@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}" dir="{{ direction }}" class="{{ checkout_html_classes }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0, user-scalable=0">
+    <meta name="referrer" content="origin">
+
+    <title>{{ page_title }}</title>
+
+    <script async src="https://www.googleoptimize.com/optimize.js?id=OPT-5QJCFVR"></script>
+    {{ content_for_header }}
+
+    {{ checkout_stylesheets }}
+    {{ checkout_scripts }}
+  
+
+  {% include 'visely-head-includes' %}
+
+
+  {% include 'visely-script-includes' %}
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  {% include "hotjar" %}
+  
+  {% include "loyaltylion" %}
+  <script>lion.configure({ checkout: true })</script>
+
+</head>
+  <body>
+    {{ skip_to_content_link }}
+
+    <header class="banner" data-header role="banner">
+      <div class="wrap">
+        {{ content_for_logo }}
+      </div>
+    </header>
+
+    {{ order_summary_toggle }}
+    <div class="content" data-content>
+      <div class="wrap">
+        <div class="main">
+          <header class="main__header" role="banner">
+            {{ content_for_logo }}
+            {{ breadcrumb }}
+            {{ alternative_payment_methods }}
+          </header>
+          <main class="main__content" role="main">
+            {{ content_for_layout }}
+          </main>
+          <footer class="main__footer" role="contentinfo">
+            {{ content_for_footer }}
+          </footer>
+        </div>
+        <aside class="sidebar" role="complementary">
+          <div class="sidebar__header">
+            {{ content_for_logo }}
+          </div>
+          <div class="sidebar__content">
+            {{ content_for_order_summary }}
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    {{ tracking_code }}
+     <!-- HC - Discount note - 3 Sep '19 -->
+    <script>
+      var el = document.querySelector('#order-summary > div > div.order-summary__section.order-summary__section--discount > form:nth-child(3) > div > div');
+      elChild = document.createElement('div');
+      elChild.setAttribute('class', 'discount');
+      elChild.innerHTML = 'Only one promo code can be applied per transaction. Promotions cannot be combined.';
+      el.appendChild(elChild);
+    </script>
+    <style>
+      .discount {
+        margin: 10px 0 -10px;
+      }
+    </style>
+    
+    {% assign found_title = false %}
+    {% for item in checkout.line_items %}
+      {% if item.variant.id == 39324640182368 %}
+        {% assign found_title = true %}
+      {% endif %}
+    {% endfor %}
+
+    {% if found_title == false %}
+    <script>
+      $(document).ready(function() {
+        if ($('.tags-list span.reduction-code__text').text().toLowerCase() == 'america' && $('.tags-list').length == 1) {
+          var variantId = 39324640182368;
+          jQuery.post('/cart/add.js', {
+            quantity: 1,
+            id: variantId
+          })
+          setTimeout( 
+            function() {
+              if(!window.location.hash) {
+                  window.location = window.location + '#success';
+                  window.location.reload();
+              }
+            }, 1000);
+        }
+      });
+    </script>
+    {% endif %}
+    <script>
+      $(document).ready(function() {
+        $('.order-summary__section--discount button').on('click', function() {
+          setTimeout( 
+           function() {
+               window.location.reload(true);
+           },2000);
+        });
+      });
+    </script>
+    
+    {% include 'smsbump_checkout_marketing_subscription' %}
+
+  </body>
+    <!-- HC adding Shipping note above the Shipping form 13 Jun '19 --> 
+  <script>
+    var el = document.querySelector('div.section--shipping-address .section__header');
+    elChild = document.createElement('div');
+    elChild.setAttribute('class', 'note');
+    elChild.innerHTML = 'Please note: Orders may take 7-10 days to process and ship. Orders ship and deliver Monday through Friday. Shipping delivery times are only estimates and not guaranteed. Choosing expedited shipping will only decrease your shipping time once it is picked up by the mail carrier. If you need your order by a certain time, reach out to us directly at info@redlandcotton.com and we will work with you to get your package to you promptly. Please anticipate a longer wait time during sale periods.';
+    el.appendChild(elChild);
+  </script>
+  <style>
+    .note{
+      margin:10px 0px;
+      text-align: justify;
+      line-height: 1.4;
+      font-size:12px;
+    }
+  </style>
+  <!-- End HC 13 Jun '19 -->
+</html>
+
+<script>
+  document.addEventListener("page:load", function() {
+    addBundle();
+  })
+  document.addEventListener("page:change", function() {
+    addBundle();
+  })
+  function addBundle() {
+    var el = $('.product-table .product');
+    el.hide();
+    fetch('/cart.js', {
+      method: 'GET',
+      headers: {
+      'Accept-Type': 'application/json'
+      },
+    })
+    .then(response => {
+      response.json().then(data => {
+        var items = data.items;
+        var bundleWrapItems = items.filter(item => item.id == 39477865349216)
+        var price = "free";
+        
+        bundleWrapItems.forEach(bundleWrapItem => {
+          var bundleitems = items.filter(item => {
+            return item.properties?.bundle_id == bundleWrapItem.properties?.bundle_id && item.id != bundleWrapItem.id
+          })
+          addBundleIdAttribute(el, bundleWrapItem);
+
+          price = getPrice(bundleitems)
+          bundleitems.forEach((item, index) => {
+            el.each(function() {
+              var attr = $(this).attr('data-variant-id')
+              var bundle_id = $(this).attr("bundle-id")
+              if (item.id.toString() == attr.toString()) {
+                $(this).hide()
+              }
+              if(bundleWrapItem.id.toString() == attr.toString() && bundle_id == bundleWrapItem.properties?.bundle_id) {
+                $(this).find(".order-summary__small-text").hide()
+                $(this).find(".product__price span").text(price)
+                bundleitems.forEach((item2) => {
+                  var htm = '<span class="product__description__property order-summary__small-text">' + item2.title + '</span>'
+                  $(this).find(".product__description").append(htm)
+                })
+
+              }
+            })
+          })
+        })
+        var visibel = $('.product-table .product').filter(":visible")
+        if(visibel.length < 3) {
+          $(".order-summary__scroll-indicator").hide()
+        } else {
+          $(".order-summary__scroll-indicator").show()
+        }
+      })
+      el.show()
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      el.show()
+    });
+  }
+
+  function addBundleIdAttribute(el, bundleWrapItem) {
+    el.each(function() {
+      var attr = $(this).attr('data-variant-id')
+      var bundle_id = $(this).attr("bundle-id")
+      if(bundleWrapItem.id.toString() == attr.toString() && !bundle_id) {
+        $(this).attr("bundle-id", bundleWrapItem.properties?.bundle_id)
+        return false
+      }
+    })
+  }
+  function getPrice(items) {
+    var price = 0;
+    var count = 0
+    items.forEach(item => {
+      count = count + item.quantity;
+    })
+    items.forEach(item => {
+      if (count > 1) {
+        price = price + item.discounted_price * item.quantity
+      } else {
+        price = price + item.price*item.quantity
+      }
+    })
+   
+   
+    var locale = window.Shopify?.Checkout?.locale 
+    var currency = window.Shopify?.Checkout?.currency 
+    price = new Intl.NumberFormat(locale, { style: 'currency', currency: currency }).format((price/100))
+    return price
+  }
+ 
+</script>

@@ -1,0 +1,14 @@
+{{ 'cookie-consent.css' | asset_url | stylesheet_tag }}
+
+<div class="cookie-container">
+    <p>
+        This website uses cookies and similar technologies to provide functionality and analytics that support your web browsing experience, to enable you to receive messages from us, and to provide you with relevant advertisements.
+         For more information, please see our <a href="/policies/privacy-policy" target="_blank">Privacy Policy</a>.
+    </p>
+
+    <button class="cookie-btn btn btn--primary">
+      Got it
+    </button>
+</div>
+
+  <script src="{{ 'cookie-consent.js' | asset_url }}" defer="defer"></script>

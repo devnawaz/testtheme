@@ -1,0 +1,8 @@
+{% include 'product-content.zipifypages', contentprt: 'header' %}{% comment %}
+  Exact same as normal product template but without unneeded markup
+  that slows down ajax loading
+{% endcomment %}
+
+{% layout none %}
+{% section 'product-template' %}
+{% include 'product-content.zipifypages', contentprt: 'footer' %}

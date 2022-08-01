@@ -1,0 +1,246 @@
+<div id="filters" class="grid__item medium-up--one-fifth grid__item--sidebar" style="top: 150.797px;">
+          <div id="shopify-section-collection-sidebar" class="shopify-section">
+            <div id="CollectionSidebar" data-section-id="collection-sidebar" data-section-type="collection-sidebar" data-combine-tags="true" data-style="sidebar">
+                <div class="collection-sidebar small--hide">
+                    <ul class="no-bullets tag-list tag-list--active-tags"></ul>
+                    <div class="collection-sidebar__group--1c75566c-c78c-4e2e-bd08-e313f5ec20b0">
+                        <div class="collection-sidebar__group">
+                            <button type="button" class="collapsible-trigger collapsible-trigger-btn collapsible--auto-height is-open tag-list__header" aria-controls="CollectionSidebar-3" aria-expanded="true">
+                                Product Type
+                                <span class="collapsible-trigger__icon collapsible-trigger__icon--open" role="presentation">
+                                <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon--wide icon-chevron-down" viewBox="0 0 28 16"><path d="M1.57 1.59l12.76 12.77L27.1 1.59" stroke-width="2" stroke="#000" fill="none" fill-rule="evenodd"></path></svg>
+                                </span>
+                            </button>
+                            <div id="CollectionSidebar-3" class="collapsible-content collapsible-content--sidebar is-open" style="height: auto;">
+                                <div class="collapsible-content__inner">
+                                    <ul class="no-bullets tag-list--checkboxes">
+                                        <li class="tag" id="SHEETS" onclick="filter('SHEETS')">
+                                            <a href="#">Sheets</a>
+                                        </li>
+                                        <li class="tag" id="PILLOWCASES" onclick="filter('PILLOWCASES')">
+                                            <a href="#">Pillow Cases</a>
+                                        </li>
+                                        <li class="tag" id="TOWELS" onclick="filter('TOWELS')">
+                                            <a href="#">Towels</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <style data-shopify="">
+                @media screen and (min-width: 769px) {
+                .collection-filter__item--drawer {
+                    display: none;
+                }
+                .collection-filter__item--count {
+                    text-align: left;
+                }
+                html[dir="rtl"] .collection-filter__item--count {
+                    text-align: right;
+                }
+                }
+            </style>
+    </div>
+</div>
+
+<div id="filters-mob">
+    <select id="filterSelect" onChange="filter()">
+        <option value="PRODUCT TYPE">Product Type</option>
+        <option value="SHEETS">Sheets</option>
+        <option value="PILLOWCASES">Pillow Cases</option>
+        <option value="TOWELS">Towels</option>
+    </select>
+</div>
+<script>
+// FILTER
+document.getElementsByClassName("medium-up--three-quarters")[0].classList = "grid__item medium-up--four-fifths grid__item--content"; // Set up the grid for the filters 
+var faqContainer = document.getElementsByClassName("medium-up--four-fifths")[0];
+var filterContainer = document.getElementById("filters");
+faqContainer.parentElement.insertBefore(filterContainer, faqContainer); // Grab FAQ and Filter Container and place them on the same grid
+// mobile filter
+var header = document.getElementsByClassName('section-header')[0];
+var select = document.getElementById("filters-mob");
+header.appendChild(select);
+
+var sections = document.getElementsByClassName("rte--nomargin")[0].querySelectorAll("h2");
+sections[0].previousElementSibling.remove(); // bring title out of child element
+sections[0].parentElement.outerHTML = '<h1 style="text-align: left;"><b>PRODUCT FAQ</b></h1>' + sections[0].parentElement.outerHTML;
+function filter(type) {
+    if (type == null)
+        type = document.getElementById("filterSelect").value;
+    var sections = document.getElementsByClassName("rte--nomargin")[0].querySelectorAll("h2");
+    if (type != "PRODUCT TYPE")
+      var checkmark = document.getElementById(type);
+    if(type == "PRODUCT TYPE" || checkmark.classList.contains("tag--active") == true) {
+        for (var i = 0; i < sections.length; i++) {
+            sections[i].parentElement.style.display = "block";
+            if (sections[i].textContent != "SHEETS") 
+                    sections[i].previousElementSibling.style.display = "block";
+            if (sections[i].textContent == type) 
+                    document.getElementById(sections[i].textContent).classList.remove("tag--active");
+        }
+    } else {
+        for (var i = 0; i < sections.length; i++) {
+            if (sections[i].textContent != type && sections[i].style.display != "none") {
+                sections[i].parentElement.style.display = "none";
+                document.getElementById(sections[i].textContent).classList.remove("tag--active");
+            } else {
+                sections[i].parentElement.style.display = "block";
+                document.getElementById(type).classList.add("tag--active");
+                if (sections[i].textContent != "SHEETS")
+                    sections[i].previousElementSibling.style.display = "none";
+            }
+        }
+    }
+}
+
+// ACCORDION
+var acc = document.getElementsByClassName("rte--nomargin")[0].querySelectorAll("p"); // Grab all the questions with query selector "p"
+var fragment = document.createDocumentFragment();
+const exception = new Array(); // grabs exceptions (questions structured differently)
+for (var i = 0; i < acc.length; i++) {
+  if (acc[i].innerHTML == "&nbsp;") { // remove empty spaces picked up from query selector
+    acc[i].style.display = "none";
+    continue;
+  } 
+  var title = acc[i].querySelector("b");
+    if (title != null) {
+      if (title.textContent == "CAN I PURCHASE JUST A FLAT SHEET?" || title.textContent == "WHAT ARE THE SIZES OF YOUR BATH TOWELS?" || title.textContent == "WHAT ARE THE DIMENSIONS OF YOUR SHEETS?") {
+        exception.push(acc[i]); // push exceptions to array to handle separately
+      }
+    }
+    let span = document.createElement("span");
+    acc[i].prepend(span);
+    span.classList.add("arrow", "down");
+
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.querySelectorAll("i");
+    var arrow = this.querySelector(".arrow");
+    for (var i = 0; i < panel.length; i++) {
+      if (panel[i].classList.contains("faq-active") == true) {
+        panel[i].classList.toggle("faq-active"); 
+        arrow.classList.remove("up");
+        arrow.classList.add("down");
+      } else {
+        panel[i].classList.toggle("faq-active"); 
+        arrow.classList.remove("down");
+        arrow.classList.add("up");
+        ga('send', {
+          hitType: 'event',
+          eventCategory: 'EnhancedEcommerce',
+          eventAction: `Viewed Question - ${title.textContent}`,
+        });
+      }
+    }
+  });
+}
+
+for (var i = 0; i < exception.length; i++) {
+    var title = exception[i].querySelector("b");
+    var arrow = exception[i].querySelector(".arrow");
+    if (title != null) {
+      if (title.textContent == "CAN I PURCHASE JUST A FLAT SHEET?") {
+        exception[i].removeChild(exception[i].querySelector("b"));
+        exception[i].removeChild(exception[i].querySelector(".arrow"));
+        exception[i].innerHTML = `${arrow.outerHTML}${title.outerHTML}<i>${exception[i].innerHTML}</i>`;
+      } else if (title.textContent == "WHAT ARE THE SIZES OF YOUR BATH TOWELS?") {
+        exception[i].nextElementSibling.classList.add("exception");
+        exception[i].nextElementSibling.removeChild(exception[i].nextElementSibling.querySelector(".arrow"));
+        fragment.appendChild(exception[i].nextElementSibling);
+        exception[i].appendChild(fragment);
+        exception[i].removeChild(exception[i].querySelector("b"));
+        exception[i].removeChild(exception[i].querySelector(".arrow"));
+        exception[i].innerHTML = `${arrow.outerHTML}${title.outerHTML}<i>${exception[i].innerHTML}</i>`;
+      } else if (title.textContent == "WHAT ARE THE DIMENSIONS OF YOUR SHEETS?") {
+        for (var j = 0; j < 3; j++){
+          exception[i].nextElementSibling.classList.add("exception");
+          exception[i].nextElementSibling.removeChild(exception[i].nextElementSibling.querySelector(".arrow"));
+          fragment.appendChild(exception[i].nextElementSibling);
+          exception[i].appendChild(fragment);
+          exception[i].removeChild(exception[i].querySelector("b"));
+          exception[i].removeChild(exception[i].querySelector(".arrow"));
+          exception[i].innerHTML = `${arrow.outerHTML}${title.outerHTML}<i>${exception[i].innerHTML}</i>`;
+        }
+      }
+    }
+}
+</script>
+
+<style>
+  .rte--nomargin p {
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    outline: none;
+    font-size: 15px;
+    transition: 0.4s;
+    border: none;
+    margin-top: -26px;
+    text-align: center !important;
+  }
+  .rte--nomargin h1 + p {
+    margin-top: 25px;
+  }
+  .rte--nomargin h2 + p {
+    margin-top: 25px;
+  }
+  .rte--nomargin i {
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
+    display: none;
+  }
+   .rte--nomargin p:not(.exception) {
+    border : 1px solid;
+    border-color: lightgray;
+  }
+  .rte--nomargin h1 {
+    text-align: center !important;
+    margin-top: 25px;
+  }
+  .rte--nomargin h2 {
+    text-align: center !important;
+    margin-top: 25px;
+  }
+  .rte--nomargin i {
+    padding: 0 18px;
+    overflow: hidden;
+    display: none;
+  }
+  .faq-active  {
+    display: block !important;
+  }
+  .arrow {
+    border: solid black;
+    border-width: 0 1px 1px 0;
+    display: inline-block;
+    padding: 3px;
+    float: right;
+  }
+  .down {
+    transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+  }
+  .up {
+    transform: rotate(-135deg);
+    -webkit-transform: rotate(-135deg);
+  }
+  #filters-mob {
+    display: none;
+  }
+  #filters-mob select {
+    border: none;
+  }
+    @media only screen and (max-width: 768px) {
+        #filters-mob {
+            display: block;
+        }  
+        .rte--nomargin p {
+          margin-top: -16px;
+        }
+    }
+</style>

@@ -1,0 +1,137 @@
+.tag-card {
+  position: absolute;
+  width: fit-content;
+  background-color: white;
+  padding: 0;
+  opacity: 100%;
+  display: none;
+  transition: opacity .5s ease;
+  animation: fadeCard .5s;
+  z-index: 3;
+}
+
+.tag-btn {
+  display: block!important;
+  width: 30px;
+  height: 30px;
+  background-color: #292929;
+  border: solid 5px white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 9px #ebebeb00;
+  animation: fadeBorder 2s infinite;
+  transition: 2s ease;
+  cursor: pointer;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.tagging-bg {
+  text-align: -webkit-center;
+  margin: auto;
+}
+.tag-btn {
+  display: block!important;
+  width: 30px;
+  height: 30px;
+  background-color: rgb(41, 41, 41);
+  border: solid 5px white;
+  border-radius: 50%;
+  box-shadow: 0px 0px 0px 9px rgb(235 235 235 / 0%);
+  animation: fadeBorder 2s infinite;
+  transition: 2s ease;
+  cursor: pointer;
+}
+
+@keyframes fadeBorder {
+  0% {
+      box-shadow: 0px 0px 0px 0px rgb(235 235 235 / 0%);
+  }
+  50% {
+      box-shadow: 0px 0px 0px 10px rgb(235 235 235 / 60%);
+  }
+  100% {
+      box-shadow: 0px 0px 0px 0px rgb(235 235 235 / 0%);
+  }
+}
+
+.tag-card.active {
+  display: block;
+}
+
+@keyframes fadeCard {
+  0% {
+      opacity: 0;
+  }
+  100% {
+      opacity: 100%;
+  }
+}
+
+.content-right p {
+  font-size: 1.4rem;
+}
+.tag-close svg {
+  width: 17px;
+}
+@media screen and (max-width: 768px) {
+  .tag-card img {
+      width: 55%;
+      height: 250px;
+  }
+  .tagging-bg img {
+      height: auto!important;
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.px-10 {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+.py-5 {
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
+.ml-10 {
+  margin-left: 2.5rem;
+}
+
+svg {
+  display: block;
+  vertical-align: middle;
+}

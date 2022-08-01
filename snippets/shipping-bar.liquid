@@ -1,0 +1,129 @@
+<style>
+  .shipping-bar {
+      position:relative;
+    }
+    .shipping-bar__message {
+      padding: 10px 0;
+      font-size: max(calc(var(--typeBaseSize) - 6px), 11px);
+        letter-spacing: 0.2em;
+        line-height: 1.42;
+        text-transform: uppercase;
+        font-weight:bold;
+        text-align: center;
+        position: relative !important;
+        }
+    .free-shipping__progress {
+      position:absolute;
+      background-color: #111111;
+      left: 0!important;
+      top: 0!important;
+      height: 100% !important;
+    }
+  .shipping-bar .shipping-bar__message {
+    text-align: center;
+    color: {{ settings.free_shipping_color_text }};
+    margin: 10px;
+  }
+  
+  
+.shipping-progress--container {
+  width: 90%;
+  margin: 5px auto 20px auto;
+}
+
+.shipping-progress--container.success {
+  display: none;
+}
+
+.shipping-progress--container .shipping-progress--progress {
+  width: 100%;
+}
+.shipping-progress--progress {
+  padding: 1px;
+  background: rgba(0, 0, 0, 0.15);
+}
+.shipping-progress--progress-bar {
+  visibility: visible;
+  background-color: {{ settings.free_shipping_color_bg }};
+  height: 10px;
+  background-image: -webkit-linear-gradient(tgwwwop, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05));
+  background-image: -moz-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05));
+  background-image: -o-linear-gradient(top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05));
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05));
+}
+
+.shipping-progress--progress-bar.animated{
+  animation: load 0.5s forwards;
+}
+
+.shipping-progress--progress-bar.success{
+  display: none;
+  background-color: {{ settings.free_shipping_success_color_bg }};
+}
+@keyframes load {
+  	0% { width: 0; }
+    100% { width: var(--percent); }
+}
+</style>
+{% if settings.is_free_shipping_bar %}
+{% assign promote_txt = settings.promote_free_shipping_txt | escape %}
+{% assign unlocked_txt = settings.unlocked_free_shipping_txt | escape %}
+{% assign threshold = settings.free_shipping_threshold | times: 100 %}
+{% assign shipping_quotient = settings.free_shipping_threshold | times: 100 | divided_by: 100 %}
+{% assign shipping_procent = cart.total_price | divided_by: shipping_quotient | at_most: 100 %}
+{% assign value_left = threshold | minus: cart.total_price %}
+{% assign value_left_money = value_left | money %}
+<div class="shipping-bar {{value_left}}  " id="shipping-bar" 
+  data-promote="{{promote_txt}}" 
+  data-unlocked="{{unlocked_txt}}" 
+  data-threshold="{{threshold}}" 
+  data-quotient="{{shipping_quotient}}" 
+  data-procent="{{shipping_procent}}"
+  >
+    {% if value_left <= 0 %}
+      <p class="shipping-bar-success shipping-bar__message" id="ship_message">{{unlocked_txt}}</p>
+      <div class="shipping-progress--container" id="ship_bar"><div class="shipping-progress--progress" ><div class="shipping-progress--progress-bar success"></div></div></div>
+    {% else %}
+      <p class="shipping-bar__message" id="ship_message">{{promote_txt | replace:'[value]' , value_left_money}}</p>
+      <div class="shipping-progress--container" id="ship_bar"><div class="shipping-progress--progress" ><div class="shipping-progress--progress-bar animated"></div></div></div>
+    {% endif %}
+    
+</div>
+{% endif %}
+
+<script>
+
+  function shipChange(cart) {
+    var price = cart.total_price/100;
+    if (price == 0){
+      var message = '';
+      document.getElementById('ship_bar').style.visibility = 'hidden'; 
+      document.querySelector('#ship_bar .shipping-progress--progress-bar').style.visibility = 'hidden';
+    } else {
+      var left = ({{threshold}}/100) - price;
+      $("#ship_bar").load(location.href + " #ship_bar");
+      if (left > 0){
+        document.getElementById('ship_bar').classList.remove('success');
+        var percent = price/{{shipping_quotient}}*100;
+        document.documentElement.style.setProperty('--percent', `${percent}%`);
+        var message = '{{promote_txt}}'.replace('[value]', `$${Math.round(left)}`);
+        document.querySelector('#ship_bar .shipping-progress--progress-bar').classList.add('animated')
+      } else {
+        document.getElementById('ship_bar').classList.add('success');
+        // document.documentElement.style.setProperty('--percent', '100%');
+        var message = '{{unlocked_txt}}';
+      }
+      document.getElementById('ship_bar').style.visibility = 'visible';
+      document.querySelector('#ship_bar .shipping-progress--progress-bar').style.visibility = 'hidden';
+    }
+      tag = document.getElementById("ship_message");
+      tag.innerHTML = message;      	
+  }
+
+  document.addEventListener('freeShippingBar:updated', function (e) {
+    e.preventDefault();
+    let { detail: { cart = [] } } = e;
+    shipChange(cart);
+  })
+
+</script>

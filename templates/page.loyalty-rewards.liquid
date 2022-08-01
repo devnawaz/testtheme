@@ -1,0 +1,186 @@
+{{ "template-loyalty.css" | asset_url | stylesheet_tag }}
+<div class="">
+
+  {%- render 'breadcrumbs' -%}
+      <header class="section-header" style="display: none;">
+        <h1 class="section-header__title">{{ page.title }}</h1>
+      </header>
+
+      <div class="">
+
+        <div class="section-hero">
+          <img width="800" height="600" src="https://cdn.shopify.com/s/files/1/1777/6857/files/IMG_0261.jpeg?v=1613698621" alt="">
+          <div class="section-hero__content">
+            <h2>The cotton club</h2>
+            <p>
+              Earn points & exclusive rewards every time you shop.
+            </p>
+            <div class="hero-links">
+              {% if customer %}
+              <a href="#earnpoints"> Earn More Points </a>
+              <a href="#history"> Rewards History </a>
+              {% else %}
+              <a href="/account/register">join now</a>
+              <a href="/account"> login </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="section-hiw">
+          <h2>How it works</h2>
+          <div class="section-hiw__items">
+            <div class="item">
+              <h2>01</h2>
+              <span>sign up</span>
+              <p>
+                Create an account and get 250 points.
+              </p>
+            </div>
+            <div class="item">
+              <h2>02</h2>
+              <span>earn points</span>
+              <p>
+                Earn points every time you shop.
+              </p>
+            </div>
+            <div class="item">
+              <h2>03</h2>
+              <span>redeem points</span>
+              <p>
+                Redeem points for exclusive discounts.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="section-tcc">
+          <h2>The cotton club</h2>
+          <div class="section-tcc__items">
+            <div class="item">
+              <div class="img_wrapper">
+                <img width="40" height="50" src="https://cdn.shopify.com/s/files/1/1777/6857/files/seed-icon.png?v=1645649280" alt="">
+              </div>
+              <h2>the seed</h2>
+              <span class="item__level">entry level</span>
+              <ul>
+                <li>1 point for every $1</li>
+                <li>100 birthday points</li>
+                <li>Free shipping on orders $99+</li>
+              </ul>
+            </div>
+            <div class="item">
+              <div class="img_wrapper">
+                <img width="40" height="50" src="https://cdn.shopify.com/s/files/1/1777/6857/files/Bloom-Icon.png?v=1645649280" alt="">
+              </div>
+              <h2>the bloom</h2>
+              <span class="item__level">spend $1,000</span>
+              <ul>
+                <li>5 points for every $1</li>
+                <li>150 birthday points</li>
+                <li>Free shipping on orders $99+</li>
+                <li>Free Signature Detergent</li>
+              </ul>
+            </div>
+            <div class="item">
+              <div class="img_wrapper">
+                <img width="30" height="40" src="https://cdn.shopify.com/s/files/1/1777/6857/files/BOLL-ICON.png?v=1645649280" alt="">
+              </div>
+              <h2>the boll</h2>
+              <span class="item__level">spend $2,000</span>
+              <ul>
+                <li>10 point for every $1</li>
+                <li>150 birthday points</li>
+                <li>Free shipping on all orders</li>
+                <li>Free Signature Detergent</li>
+                <li>Free All-American Throw Blanket</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="section-wtep" id="earnpoints">
+          <h2>ways to earn points</h2>
+          <div class="section-wtep__wrapper">
+            <div data-lion-rules-list class="section-content"></div>
+          </div>
+        </div>
+        {% if customer %}
+        <div class="section-his" id="history">
+          <h2>Your history</h2>
+          <span>You have <span data-lion-points="approved"></span> points!</span>
+          <div data-lion-history-table></div>
+        </div>
+        {% endif %}
+        <div class="section-ryp">
+            <h2>Redeem your points</h2>
+            <span class="paragraph">
+              Redeeming your points is easy! Simply apply your points for up to $100 off at checkout.
+            </span>
+            <span class="points">
+              1000 points equals $10.00
+            </span>
+            <div class="referral">
+              <div class="referral__left">
+                <img width="200" src="https://cdn.shopify.com/s/files/1/1777/6857/files/letter-icon.jpg?v=1644869868" alt="">
+                <h2>give 20%,  get 20%</h2>
+                <span class="info">
+                  Give your friends 20% off on their first order of $100+ and get 20% for each successfull referral.
+                </span>
+                {% if customer %}
+                 <div data-lion-account class="data-lion-account__wrapper"></div>
+                 {% else %}
+                 <div class="hero-links">
+                   <a href="/account/register">Sign up</a>
+                 </div>
+                {% endif %}
+              </div>
+              <div class="img_wrapper">
+                <img src="https://cdn.shopify.com/s/files/1/1777/6857/files/refer-a-friend-image.jpg?v=1644867670" alt="">
+              </div>
+            </div>
+        </div>
+      </div>
+</div>
+
+
+<script>
+  var config = { attributes: true, childList: true, characterData: true };
+  {% if customer %}
+  var account = document.querySelector('[data-lion-account]');
+  var account_observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      document.querySelector('.lion-loyalty-panel-sidebar__menu-item--refer').click();
+      let items = document.querySelectorAll('.lion-referral-email-form .lion-referral-email-form__field');
+      items[0].classList.add('show_input');
+      let buttons = document.querySelector('.lion-referral-email-form__buttons');
+      document.querySelector('.lion-action-button--neutral').innerHTML = '&#8593;';
+    });
+  });
+  account_observer.observe(account, config);
+  {% endif %}
+  var rules = document.querySelector('[data-lion-rules-list]');
+  var rules_observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      {% if customer %}
+      let purchaseBtn = document.querySelector('.lion-rule-item--purchase .lion-action-button--tile');
+      purchaseBtn.innerHTML = 'Shop now';
+      purchaseBtn.addEventListener('click', function() {
+        window.location.href = '/collections/best-sellers';
+      });
+      {% else %}
+      let items = document.querySelectorAll('.lion-rule-item .lion-rule-item__content');
+        let actionBtn = document.createElement('div');
+        actionBtn.classList.add('lion-rule-item__actions');
+        Object.keys(items).forEach(key => {
+          if(!items[key].innerHTML.includes('<div class="lion-rule-item__actions">')) {
+            items[key].innerHTML = items[key].innerHTML + `
+            <div class="lion-rule-item__actions">
+              <button class="lion-action-button lion-action-button--tile" onclick="javascript:location.href='/account'">
+                Sign up
+              </button>
+            </div>`
+          }
+        });
+      {% endif %}
+    });
+  });
+  rules_observer.observe(rules, config);
+</script>

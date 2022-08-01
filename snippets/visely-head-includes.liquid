@@ -1,0 +1,35 @@
+<link rel="preconnect" href="//api.nemo.ai" crossorigin>
+<link rel="preconnect" href="//storage.googleapis.com" crossorigin>
+<script type="text/javascript">
+  var ViselyPage = '{{template.name}}';
+  var ViselyResource = {theme:"{{theme.id}}",page:"{{template.name}}",template:"{{template.suffix}}",handle:"{{handle}}"};
+  var ViselyProductId = '{{product.id}}';
+  var ViselyProductType = '{{product.type}}';
+  var ViselyProductTags = '{{ product.tags | join: ',' | escape}}';
+  var ViselyArticleTags = '{{ article.tags | join: ',' | escape}}'; 
+  var ViselyCartProductIds = '{{ cart.items | map: 'product_id' | join: ','}}';
+  {%unless collectionIds%} 
+    {% assign collectionIds = '' %}
+    {% if product %}
+      {% capture collectionIds %}{{ product.collections | map: 'id' | join: "," }}{% endcapture %}
+    {% elsif collection %}
+      {% capture collectionIds %}{{ collection.id }}{% endcapture %}  
+    {% endif%}  
+  {% endunless %}
+  var ViselyCollectionIds = '{{collectionIds}}';
+  var ViselyProductName = '{{product.title | escape}}';
+  var ViselyArticleName = '{{ article.title  | escape | split: ":" | first}}';
+  var ViselyPageLoadStart = ViselyPageLoadStart || performance ? performance.now() : -1;
+  var ViselyContext = ViselyContext || {% if customer %}{ 'currentCustomer': { 'email': '{{customer.email}}' } }{% else %}{}{% endif %};  
+</script>
+<script type="text/javascript">
+  (function(){if(typeof window.CustomEvent==="function")return!1;function CustomEvent(event,params){params=params||{bubbles:!1,cancelable:!1,detail:undefined};var evt=document.createEvent('CustomEvent');evt.initCustomEvent(event,params.bubbles,params.cancelable,params.detail);return evt}
+ CustomEvent.prototype=window.Event.prototype;window.CustomEvent=CustomEvent})();if(!Array.from){Array.from=(function(){var toStr=Object.prototype.toString;var isCallable=function(fn){return typeof fn==='function'||toStr.call(fn)==='[object Function]'};var toInteger=function(value){var number=Number(value);if(isNaN(number)){return 0}
+ if(number===0||!isFinite(number)){return number}
+ return(number>0?1:-1)*Math.floor(Math.abs(number))};var maxSafeInteger=Math.pow(2,53)-1;var toLength=function(value){var len=toInteger(value);return Math.min(Math.max(len,0),maxSafeInteger)};return function from(arrayLike){var C=this;var items=Object(arrayLike);if(arrayLike==null){throw new TypeError('Array.from requires an array-like object - not null or undefined')}
+ var mapFn=arguments.length>1?arguments[1]:void undefined;var T;if(typeof mapFn!=='undefined'){if(!isCallable(mapFn)){throw new TypeError('Array.from: when provided, the second argument must be a function')}
+ if(arguments.length>2){T=arguments[2]}}
+ var len=toLength(items.length);var A=isCallable(C)?Object(new C(len)):new Array(len);var k=0;var kValue;while(k<len){kValue=items[k];if(mapFn){A[k]=typeof T==='undefined'?mapFn(kValue,k):mapFn.call(T,kValue,k)}else{A[k]=kValue}
+ k+=1}A.length=len;return A}}())}
+ </script>
+ <script type="text/javascript">Array.prototype.includes||Object.defineProperty(Array.prototype,"includes",{configurable:true,value:function(r,e){if(null==this)throw new TypeError('"this" is null or not defined');var t=Object(this),n=t.length>>>0;if(0===n)return!1;var i,o,a=0|e,u=Math.max(a>=0?a:n-Math.abs(a),0);for(;u<n;){if((i=t[u])===(o=r)||"number"==typeof i&&"number"==typeof o&&isNaN(i)&&isNaN(o))return!0;u++}return!1}});</script>

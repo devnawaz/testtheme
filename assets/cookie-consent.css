@@ -1,0 +1,30 @@
+.wrapper {
+  padding: 32px;
+}
+.cookie-container {
+  position: fixed;
+  bottom: -100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  color: black;
+  padding: 0 32px;
+  box-shadow: 0 -2px 16px rgba(47, 54, 64, 0.39);
+  width: 600px;
+  padding: 25px;
+  text-align: center;
+  z-index: 10;
+  transition: 400ms;
+}
+.cookie-container.active {
+  bottom: 40px;
+}
+.cookie-container a {
+  color: black;
+  text-decoration: underline;
+}
+@media screen and (max-width: 600px) {
+  .cookie-container {
+      width: 100%;
+  }
+}

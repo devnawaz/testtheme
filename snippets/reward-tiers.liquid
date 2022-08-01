@@ -1,0 +1,374 @@
+<!-- Loyalty rewards -->
+<style>
+  .reward-container {
+  	display: none;
+  }
+  #simpleRewards {
+  	display: none;
+  }
+.reward-handle .icon {
+  	flex: 15%!important;
+    height: auto!important;
+}
+.loyalty-rewards-drawer {
+    font-size: 12px;
+    color: #000;
+}
+.rewards-vip-tier > div {
+    cursor: pointer;
+}
+.join-container {
+	position: relative;
+    width: 100%;
+  	text-align: center;
+  	display: flex;
+}
+.tier-wrapper-drawer {
+    display: flex;
+    padding: 10px 30px;
+    align-items: center;
+    position: relative;
+    height: 50px;
+  	line-height: 16px;
+    border-top: 1px solid #efefef;
+}
+.tier-wrapper-drawer .icon {
+    line-height: 0;
+}
+.tier-wrapper-drawer .icon svg {
+    width: 25px;
+    margin-right: 5px;
+    height: auto;
+}
+.tier-name-drawer, .tier-multiplier-drawer {
+    margin-right: 5px;
+    flex: 55%;
+}
+.tier-spent-drawer {
+    font-size: 11px;
+}
+.tier-earned-drawer {
+  flex: 35%;
+  text-align: right;
+}
+.t-signup {
+  	width: 100%;
+    text-align: center;
+}
+.t-signup a {
+  	text-decoration: underline;
+}
+.tier-earned-drawer span {
+    font-weight: 700;
+}
+  .seed, .bloom, .boll {
+  	display: none;
+  }
+  .seed .chevron, .bloom .chevron, .boll .chevron {
+  	display: none;
+  }
+  .tflex {
+  	display: flex;
+  }
+  .bottom {
+  	cursor: pointer;
+  }
+  .bottom svg {
+  	transform: rotate(180deg);
+    vertical-align: middle;
+  }
+  .chevron {
+  	cursor: pointer;
+    text-align: right;
+    line-height: 1;
+  }
+  .chevron path {
+  	stroke: #000;
+    stroke-width: 2px;
+  }
+  .notlog .chevron {
+    right: 0;
+    position: absolute;
+  }
+  .notlog .chevron svg {
+  	height: 32px;
+  }
+  .notlog {
+  	cursor: pointer;
+  }
+{% if customer %}
+  .notlog {
+  	display: none;
+  }
+  .chevron {
+    flex: 8%;
+  }
+  .logged {
+  	display: flex;
+  }
+{% else %}
+  .logged {
+  	display: none;
+  }
+{% endif %}
+  @media only screen and (max-width:768px) {
+    .tier-wrapper-drawer {
+      padding: 10px 19px;
+    }
+  }
+  
+  #simpleRewards .text-rewards {
+  	text-transform: uppercase;
+    letter-spacing: 0.3em;
+    font-size: 0.75em;
+    margin-bottom: 0px;
+  }
+  #simpleRewards #totalEarn {
+    font-size: 0.85em;
+    margin-bottom: 0px;
+    font-weight: bold;
+  }
+  #simpleRewards {
+  	margin-bottom: 5px;
+  }
+</style>
+
+
+
+<script>
+  function tierCheck() {
+  	jQuery.getJSON('/cart.js', function(cart) {
+      var totalPrice = cart.total_price;
+      var pseed = totalPrice/100 * 1;
+      var pbloom = totalPrice/100 * 5;
+      var pboll = totalPrice/100 * 10;
+      
+      
+      {% unless customer %}
+      // not logged
+
+      if(totalPrice <= 99900) {
+        document.getElementById('totalEarned').innerHTML = pseed;
+        document.getElementById('pseed').innerHTML = 'Earn ' + pseed;
+        document.getElementById('pbloom').innerHTML = pbloom;
+      	document.getElementById('pboll').innerHTML = pboll;
+       $('.seed').css({display: 'none', background: '#e8b6b3'});
+       $('.bloom').hide();
+       $('.boll').hide();
+       $('.notlog').on('click', function(e){
+        if (!$(e.target).hasClass('reg')) {
+            $('.notlog .chevron').toggleClass('bottom');
+         	$(".seed").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+            $(".bloom").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+            $(".boll").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+        }
+       });
+      }
+      
+      if(totalPrice >= 100000 && totalPrice <= 199900) {
+        document.getElementById('totalEarned').innerHTML = pseed;
+        document.getElementById('pseed').innerHTML = pseed;
+        document.getElementById('pbloom').innerHTML = 'Earn ' + pbloom;
+      	document.getElementById('pboll').innerHTML = pboll;
+       $('.seed').hide();
+       $('.bloom').css({display: 'none', background: '#e8b6b3'});
+       $('.boll').hide();
+       $('.notlog').on('click', function(e){
+         if (!$(e.target).hasClass('reg')) {
+            $('.notlog .chevron').toggleClass('bottom');
+            $(".seed").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+            $(".bloom").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+            $(".boll").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+         }
+       });
+      }
+      
+      if(totalPrice >= 200000) {
+        document.getElementById('totalEarned').innerHTML = pseed;
+        document.getElementById('pseed').innerHTML = pseed;
+        document.getElementById('pbloom').innerHTML = pbloom;
+      	document.getElementById('pboll').innerHTML = 'Earn ' + pboll;
+       $('.seed').hide();
+       $('.bloom').hide();
+       $('.boll').css({display: 'none', background: '#e8b6b3'});
+       $('.notlog').on('click', function(e){
+         if (!$(e.target).hasClass('reg')) {
+            $('.notlog .chevron').toggleClass('bottom');
+            $(".seed").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+            $(".bloom").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+            $(".boll").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+         }
+       });
+      }
+      
+      {% else %}
+      // Logged customers
+      
+      if(totalPrice <= 99900) {
+        document.getElementById('totalEarned').innerHTML = pseed;
+        document.getElementById('pseed').innerHTML = 'Earn ' + pseed;
+        document.getElementById('pbloom').innerHTML = pbloom;
+      	document.getElementById('pboll').innerHTML = pboll;
+        $('.seed').css({display: 'flex', background: '#e8b6b3'});
+        $('.seed .icon').css('margin-right', '5px');
+        $('.bloom').hide();
+        $('.boll').hide();
+        $('.logged').hide();
+        $('.seed .chevron').show();
+          $('.seed').on('click', function(){
+            $('.seed .chevron').toggleClass('bottom');
+            $(".bloom").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+            $(".boll").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+            $(".logged").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+          });
+          $('.seed').css({
+             cursor: "pointer"
+          });
+      }
+      
+      if(totalPrice >= 100000 && totalPrice <= 199900) {
+        document.getElementById('totalEarned').innerHTML = pbloom;
+        document.getElementById('pbloom').innerHTML = 'Earn ' + pbloom;
+      	document.getElementById('pboll').innerHTML = pboll;
+      	$('.seed').hide();
+        $('.bloom').css({display: 'flex', background: '#e8b6b3'});
+        $('.bloom .icon').css('margin-right', '5px');
+        $('.boll').hide();
+        $('.logged').hide();
+        $('.bloom, .chevron').show();
+        $('.boll .chevron').hide();
+          $('.bloom').on('click', function(){
+            $('.bloom .chevron').toggleClass('bottom');
+            $(".boll").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+            $(".logged").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+          });
+          $('.bloom').css({
+             cursor: "pointer"
+          });
+      } 
+      
+      if(totalPrice >= 200000) {
+        document.getElementById('totalEarned').innerHTML = pboll;
+        document.getElementById('pboll').innerHTML = 'Earn ' + pboll;
+      	$('.seed').hide();
+        $('.bloom').hide();
+        $('.boll').css({display: 'flex', background: '#e8b6b3'});
+        $('.boll .icon').css('margin-right', '5px');
+        $('.logged').hide();
+        $('.boll .chevron').show();
+        $('.boll').on('click', function(){
+            $('.boll .chevron').toggleClass('bottom');
+            $(".logged").slideToggle({
+              start: function () {
+                $(this).css({
+                  display: "flex"
+                })
+              }
+            });
+          });
+          $('.boll').css({
+             cursor: "pointer"
+          });
+      }
+      
+      {% endunless %}
+      
+      /** simplified reward**/
+      var totalEarn = document.getElementById('totalEarn');
+      if(totalPrice <= 99900) {
+        totalEarn.innerHTML = 'Earn ' + pseed + ' Points';
+      }
+      if(totalPrice >= 100000 && totalPrice <= 199900) {
+        totalEarn.innerHTML = 'Earn ' + pbloom + ' Points';
+      }
+      if(totalPrice >= 200000) {
+        totalEarn.innerHTML = 'Earn ' + pboll + ' Points';
+      }
+    });
+
+  }
+</script>

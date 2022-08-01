@@ -1,0 +1,21 @@
+{{ 'tagging.css' | asset_url | stylesheet_tag }}
+
+{% section 'collection-bundle-header' %}
+
+<script>
+  var bundle_item_arr = [];
+</script>
+
+<div id="CollectionAjaxResult" class="collection-content">
+  <div id="CollectionAjaxContent">
+    <div class="page-width bundle-page">
+      <div class="grid">
+        <div class="grid__item medium-up--one-whole grid__item--content">
+          <div class="collection-grid__wrapper">
+            {% section 'collection-bundle-section' %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

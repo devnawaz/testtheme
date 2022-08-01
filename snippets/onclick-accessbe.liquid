@@ -1,0 +1,111 @@
+<script>
+function accTrigger() {
+    !(function() {
+        const t = {
+            AccessibilityWidget: null,
+            Host: "https://accessibly.onthemapmarketing.com",
+            Routes: {
+                Settings: "/api/shop/options"
+            },
+            Settings: {},
+            Name: "OTMAccessibilityWidget",
+            Run: function() {
+                var e = Shopify.shop;
+                t.LoadSettings(e, function(e) {
+                    (t.Settings = e),
+                    t.AppendAccessibilityWidget(function() {
+                        t.AccessibilityWidget = t.ConfigurePlugin(t.Settings);
+                    });
+                });
+            },
+            Request: function(t, e, n = null) {
+                return new Promise(function(i, s) {
+                    const c = new XMLHttpRequest();
+                    c.open(e, t),
+                        "POST" === e &&
+                        c.setRequestHeader(
+                            "Content-Type",
+                            "application/x-www-form-urlencoded"
+                        ),
+                        (c.onload = function() {
+                            c.status >= 200 && c.status < 300 ?
+                                i(JSON.parse(c.response)) :
+                                s("The request failed!");
+                        }),
+                        c.send(n);
+                });
+            },
+            Get: function(e) {
+                return t.Request(e, "GET");
+            },
+            Post: function(e) {
+                return t.Request(e, "POST");
+            },
+            LoadSettings: function(e, n) {
+                const i = t.Host + t.Routes.Settings;
+                t.Get(i + "?shop=" + e + "&url=" + window.location.href)
+                    .then(function(t) {
+                        n(t);
+                    })
+                    .catch(function(t) {
+                        console.error("Something wen't wrong. %s", t);
+                    });
+            },
+            AppendAccessibilityWidget: function(t) {
+                const e = "https://cdn.accessibly.app/accessibility-widget.min.css";
+                if (!document.querySelectorAll('link[href="' + e + '"]').length > 0) {
+                    var n = document.createElement("link");
+                    (n.href = e), (n.rel = "stylesheet"), document.head.appendChild(n);
+                }
+                const i = "https://cdn.accessibly.app/accessibility-widget.umd.js";
+                if (!document.querySelectorAll('[src="' + i + '"]').length > 0) {
+                    var s = document.createElement("script");
+                    (s.src = i),
+                    (s.async = !0),
+                    (s.type = "text/javascript"),
+                    (s.onload = t),
+                    document.body.appendChild(s);
+                }
+            },
+            ConfigurePlugin: function(t) {
+                accessibilityWidget(t);
+            },
+        };
+        void 0 === window.OTMAccessibilityWidget &&
+            (t.Run(), (window.OTMAccessibilityWidget = t));
+    })();
+
+}
+
+function showAcc() {
+    setTimeout(function() {
+        var x = document.querySelector('.accessibility-menu-btn');
+        if ($('.toggle-acc').is(':checked')) {
+
+            x.style.opacity = 1;
+
+            if (window.sessionStorage) {
+                sessionStorage.setItem("accesibility", "true");
+            }
+        } else {
+            x.style.opacity = 0;
+            sessionStorage.setItem("accesibility", "false");
+        }
+    }, 1000);
+}
+
+$(function() {
+    $('#trigger-accessibility').on('click', function() {
+        $('#accessibility-widget').css('visibility', 'visible');
+        sessionStorage.setItem("accesibility", "true");
+        accTrigger();
+        showAcc();
+
+    });
+    if (sessionStorage.getItem("accesibility") == 'true') {
+        $('.toggle-acc').trigger('click');
+        showAcc();
+    }
+
+});
+</script>

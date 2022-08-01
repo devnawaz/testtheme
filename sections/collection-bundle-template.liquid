@@ -1,0 +1,79 @@
+{%- assign per_row = section.settings.per_row -%}
+{%- assign paginate_by = per_row | times: section.settings.rows_per_page -%}
+
+<div
+  id="CollectionSection"
+  data-section-id="{{ section.id }}"
+  data-section-type="collection-bundle-template">
+
+  <div class="bundle-tab__list" data-aos="row-of-3">
+  {%- for block in section.blocks -%}
+    <div class="bundle-tab__item" data-aos="row-of-3">
+      {%- if block.settings.title != blank -%}
+        <span class="bundle-tab__item-count">2</span>
+        <span class="bundle-tab__item-text">{{ block.settings.title }}</span>
+      {%- endif -%}
+    </div>
+  {%- endfor -%}
+  </div>
+  {% render 'product-bundle' %}
+  <div
+    class="grid grid--uniform grid--collection{% if section.settings.mobile_flush_grid %} small--grid--flush{% endif %}"{% unless section.settings.enable_collection_count %} data-scroll-to{% endunless %}>
+    {%- liquid
+      assign grid_item_width = 'small--one-half medium-up--one-third'
+
+      case per_row
+        when 2
+          assign grid_item_width = 'medium-up--one-half'
+        when 3
+          assign grid_item_width = 'small--one-half medium-up--one-third'
+        when 4
+          assign grid_item_width = 'small--one-half medium-up--one-quarter'
+        when 5
+          assign grid_item_width = 'small--one-half medium-up--one-fifth'
+      endcase
+    -%}
+
+    {%- for product in collection.products -%}
+      {%- render 'product-grid-item', product: product, grid_item_width: grid_item_width -%}
+    {%- else -%}
+      <div class="grid__item">
+        <p>{{ 'collections.general.no_matches' | t }}</p>
+      </div>
+    {%- endfor -%}
+
+  </div>
+
+</div>
+
+
+{% schema %}
+  {
+    "name": "Collection bundle pages",
+    "settings": [      
+      {
+        "type": "header",
+        "content": "Subcollections"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "Collection",
+        "name": "Collection",
+        "limit": 4,
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Collection Name"
+          },
+          {
+            "id": "collection",
+            "type": "collection",
+            "label": "Collection"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}

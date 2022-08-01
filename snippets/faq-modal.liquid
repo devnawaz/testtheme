@@ -1,0 +1,274 @@
+<div class="pop-up-modal">
+  <div class=" pop-up-content">
+    <span class="close-button">&times;</span>
+    <i class="fa fa-expand" aria-hidden="true"></i>
+    <span class="faq-content">{{ pages.faq.content }}</span>
+  </div>
+</div>
+
+<script>
+  var faqLink = document.querySelector('[title="Frequently Asked Questions"]');
+  if (faqLink != null){
+    faqLink.previousSibling.remove();
+    faqLink.remove();
+  }
+  var faqSection = document.querySelector('.collapsibles-wrapper--border-bottom');
+  var trigger = document.createElement('button');
+  trigger.classList.add('label', 'collapsible-trigger', 'collapsible-trigger-btn', 'collapsible-trigger-btn--borders', 'collapsible--auto-height');
+  faqSection.append(trigger);
+  trigger.innerHTML = `FREQUENTLY ASKED QUESTIONS <span class="collapsible-trigger__icon collapsible-trigger__icon--open" role="presentation">
+  <svg aria-hidden="true" focusable="false" role="presentation" class="icon icon--wide icon-chevron-down" viewBox="0 0 28 16"><path d="M1.57 1.59l12.76 12.77L27.1 1.59" stroke-width="2" stroke="#000" fill="none" fill-rule="evenodd"></path></svg>
+</span>`;
+  const modal = document.querySelector('.pop-up-modal');
+  const closeButton = document.querySelector('.close-button');
+  const expandButton = document.querySelector('.fa-expand');
+
+
+  function toggleModal() {
+    modal.classList.toggle('show-pop-up');
+    if (modal.classList.contains('show-pop-up') == false) {
+      trigger.classList.remove('is-open');
+      trigger.ariaExpanded = 'false';
+    }
+  }
+
+  function windowOnClick(event) {
+    if (event.target === modal) {
+      toggleModal();
+    }
+  }
+  function toggleExpand() {
+    document.querySelector('.pop-up-content').classList.toggle('expanded');
+  }
+  trigger.classList.add("trigger-pop-up");
+  trigger.href = "#";
+  trigger.addEventListener('click', toggleModal);
+  closeButton.addEventListener('click', toggleModal);
+  expandButton.addEventListener('click', toggleExpand);
+  window.addEventListener('click', windowOnClick);
+var sections = document.getElementsByClassName("faq-content")[0].querySelectorAll("h2");
+var prodType = "{{ product.type }}";
+prodType = prodType.toUpperCase();
+for (var i = 0; i < sections.length; i++) {
+  if (sections[i].textContent == "SHEETS" || sections[i].textContent == "TOWELS" || sections[i].textContent == "PILLOWCASES") {
+    if (prodType.includes(sections[i].textContent) == false) {
+        sections[i].parentElement.remove();
+    } else if (sections[i].textContent != "SHEETS") {
+      sections[i].outerHTML = "<h1 style='text-align: left;'><b>PRODUCT FAQ</b></h1>";
+    } else {
+      sections[i].remove();
+    }
+  }
+}
+var acc = document.getElementsByClassName("faq-content")[0].querySelectorAll("p");
+var fragment = document.createDocumentFragment();
+const exception = new Array();
+for (var i = 0; i < acc.length; i++) {
+  if (acc[i].innerHTML == "&nbsp;") {
+    acc[i].style.display = "none";
+    continue;
+  } 
+  var title = acc[i].querySelector("b");
+    if (title != null) {
+      if (title.textContent == "CAN I PURCHASE JUST A FLAT SHEET?" || title.textContent == "WHAT ARE THE SIZES OF YOUR BATH TOWELS?" || title.textContent == "WHAT ARE THE DIMENSIONS OF YOUR SHEETS?") {
+        exception.push(acc[i])
+      }
+    }
+    let span = document.createElement("span");
+    acc[i].prepend(span);
+    span.classList.add("arrow", "down");
+
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.querySelectorAll("i");
+    var arrow = this.querySelector(".arrow");
+    for (var i = 0; i < panel.length; i++) {
+      if (panel[i].classList.contains("faq-active") == true) {
+        panel[i].classList.toggle("faq-active"); 
+        arrow.classList.remove("up");
+        arrow.classList.add("down");
+      } else {
+        panel[i].classList.toggle("faq-active"); 
+        arrow.classList.remove("down");
+        arrow.classList.add("up");
+        ga('send', {
+          hitType: 'event',
+          eventCategory: 'EnhancedEcommerce',
+          eventAction: `Viewed Question - ${title.textContent}`,
+        });
+      }
+    }
+  });
+}
+
+for (var i = 0; i < exception.length; i++) {
+    var title = exception[i].querySelector("b");
+    var arrow = exception[i].querySelector(".arrow");
+    if (title != null) {
+      if (title.textContent == "CAN I PURCHASE JUST A FLAT SHEET?") {
+        exception[i].removeChild(exception[i].querySelector("b"));
+        exception[i].removeChild(exception[i].querySelector(".arrow"));
+        exception[i].innerHTML = `${arrow.outerHTML}${title.outerHTML}<i>${exception[i].innerHTML}</i>`;
+      } else if (title.textContent == "WHAT ARE THE SIZES OF YOUR BATH TOWELS?") {
+        exception[i].nextElementSibling.classList.add("exception");
+        exception[i].nextElementSibling.removeChild(exception[i].nextElementSibling.querySelector(".arrow"));
+        fragment.appendChild(exception[i].nextElementSibling);
+        exception[i].appendChild(fragment);
+        exception[i].removeChild(exception[i].querySelector("b"));
+        exception[i].removeChild(exception[i].querySelector(".arrow"));
+        exception[i].innerHTML = `${arrow.outerHTML}${title.outerHTML}<i>${exception[i].innerHTML}</i>`;
+      } else if (title.textContent == "WHAT ARE THE DIMENSIONS OF YOUR SHEETS?") {
+        for (var j = 0; j < 3; j++){
+          exception[i].nextElementSibling.classList.add("exception");
+          exception[i].nextElementSibling.removeChild(exception[i].nextElementSibling.querySelector(".arrow"));
+          fragment.appendChild(exception[i].nextElementSibling);
+          exception[i].appendChild(fragment);
+          exception[i].removeChild(exception[i].querySelector("b"));
+          exception[i].removeChild(exception[i].querySelector(".arrow"));
+          exception[i].innerHTML = `${arrow.outerHTML}${title.outerHTML}<i>${exception[i].innerHTML}</i>`;
+        }
+      }
+    }
+}
+</script>
+
+<style>
+  .pop-up-modal {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    display: none;
+    transform: scale(1.1);
+    transition: visibility 0s linear 0.25s, opacity 0.25s 0s, transform 0.25s;
+  }
+  .pop-up-content {
+    position: absolute;
+    background-color: white;
+    padding: 1rem 1.5rem;
+    width: 90vw;
+    border-radius: 0.5rem;
+    overflow-y: scroll;
+    height: 70vh;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow-x: hidden;
+  }
+  .expanded {
+    position: absolute;
+    background-color: white;
+    padding: 1rem 1.5rem;
+    width: auto;
+    border-radius: 0.5rem;
+    overflow-y: scroll;
+    height: 100vh;
+    width: 100vw;
+  }
+  .pop-up-content table {
+    table-layout: auto;
+  }
+  .close-button {
+    float: right;
+    width: 1.5rem;
+    line-height: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    background-color: lightgray;
+  }
+  .close-button:hover {
+    background-color: darkgray;
+  }
+  .fa-expand {
+    float: right;
+    margin-right: 5px;
+    width: 1.5rem;
+    line-height: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    background-color: lightgray;
+  }
+  .fa-expand:hover {
+    background-color: darkgray;
+  }
+  .show-pop-up {
+    z-index: 100;
+    opacity: 1;
+    display: block;
+    transform: scale(1);
+    transition: visibility 0s linear 0s, opacity 0.25s 0s, transform 0.25s;
+  }
+  .faq-content {
+    overflow-y: scroll;
+  }
+  .pop-up-content::-webkit-scrollbar {
+    width: 5px;
+  }
+  .pop-up-content::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+      border-radius: 10px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+  }
+  .pop-up-content::-webkit-scrollbar-thumb {
+    background: #888; 
+    border-radius: 10px;
+  }
+  [title="Frequently Asked Questions"] {
+    color: #242526 !important;
+    font-weight: 700;
+  }
+  .faq-content p {
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    outline: none;
+    font-size: 15px;
+    transition: 0.4s;
+    border: none;
+    margin-top: -16px;
+    text-align: center !important;
+  }
+  .faq-content h1 + p {
+    margin-top: 25px;
+  }
+  .faq-content p:not(.exception) {
+    border : 1px solid;
+    border-color: lightgray;
+  }
+  .faq-content h1 {
+    text-align: center !important;
+    margin-top: 25px;
+  }
+  .faq-content i {
+    padding: 0 18px;
+    overflow: hidden;
+    display: none;
+  }
+  .faq-active  {
+    display: block !important;
+  }
+  .faq-content br {
+    display: none
+  }
+.arrow {
+  border: solid black;
+  border-width: 0 1px 1px 0;
+  display: inline-block;
+  padding: 3px;
+  float: right;
+}
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+.up {
+  transform: rotate(-135deg);
+  -webkit-transform: rotate(-135deg);
+}
+</style>

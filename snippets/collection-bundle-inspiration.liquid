@@ -1,0 +1,140 @@
+{% if collection.metafields.bundle.image != blank %}
+  <div class="collection-bundle-inspiration-wrapper custom-inspiration-wrapper d-flex justify-between flex-wrap">
+    {% for c_img in collection.metafields.bundle.image %}
+      {% assign p_handles = collection.metafields.bundle.product[forloop.index0] | split: '|' %}
+      {% assign collection_handle = collection.metafields.bundle.collection[forloop.index0] %}
+      <div class="collection-bundle-inspiration-item tagging" data-collection-id="{{ collections[collection_handle].id }}" data-product-handle="{% for handle in p_handles %}{{ handle }}{% unless forloop.last %},{% endunless %}{% endfor %}">
+        <div class="image_wrapper" id="image-wrapper-{{ forloop.index }}" onmouseenter="showCard('image-wrapper-{{ forloop.index }}')" onmouseleave="closeCard('image-wrapper-{{ forloop.index }}')">
+          <div class="image_main">
+            <img src="{{ c_img }}" class="lazyload" loading="lazy" alt="">
+          </div>
+          {% comment %}
+          <div class="image_hover">
+            {% assign h_img = collection.metafields.bundle.hover_image[forloop.index0] | default: c_img %}
+            <img src="{{ h_img }}" class="lazyload" loading="lazy" alt="">
+          </div>
+          {% endcomment %}
+
+          {% assign tag_pos = collection.metafields.bundle.tag_pos[forloop.index0] | split: '/' %}
+          {% for p_h  in p_handles %}
+            {% assign pos = tag_pos[forloop.index0] | strip | split: '-' %}
+            {% assign btn_xpos = pos[0] | plus: 0 %}
+            {% assign btn_ypos = pos[1] | plus: 0 %}
+            {% if pos != blank %}
+              {% assign _product = all_products[p_h] %}
+              <div style="top:{{ btn_ypos }}%;left:{{ btn_xpos }}%; display: none !important;" class="tag-btn hide absolute"></div>
+              <div id="card-{{ forloop.index }}" class="tag-card" style="top:{{ btn_ypos }}%;left:{{ btn_xpos }}%;transform: translate({% if btn_xpos > 12 and btn_xpos < 50 %}-10vw{% elsif btn_xpos >= 50 %}-190px{% else %}-0px{% endif %}, {% if btn_ypos > 50 %}-100px{% else %}30px{% endif %});">
+                <div class="card-content flex flex-col items-start justify-between">
+                  <div class="content-right flex w-full" data="{%for option in _product.options_with_values %} {{option}} {% endfor %} ">
+                    <div class="image-container">
+                      <img src="{{ _product.featured_image | img_url: '150x' }}" width="60" height="42" class="toolpit-image">
+                    </div>
+                    
+                    <div>
+                      <span class="tooltip-product-title"><b>{{ _product.title }}</b></span>
+                      {%for option in _product.options_with_values  %}
+                        {% assign color = option.name | downcase %}
+                        {% assign value = option.selected_value | split: ' ' | last | handle %}
+                        {%if color contains 'color' %}
+                        {% assign swatch_file_extension = 'png' %}
+                        
+                        {% assign color_image = value | handle | append: '.' | append: swatch_file_extension | asset_img_url: '50x' | prepend: 'https:' %}
+                        {% assign color_swatch_fallback = value | split: ' ' | last | handle %}
+                          <div class="d-flex align-center">
+                            <label
+                              class="variant__button-label color-swatch color-swatch--{{ value | handle }}{% unless product_available %} disabled{% endunless %}"
+                              style="background-image: url({{ color_image }}); background-color: {{ color_swatch_fallback }}; width: 18px; height: 18px;"
+                            >
+                              {{ value | escape }}
+                            </label>
+                            <div class="color-option">{{value}}</div>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                      <div></div>
+                    <div class="mt-3">
+                      <span class="tooltip-product-price">
+                        {% if settings.cents_format == true %}
+                          <b>{{ _product.price | money | replace: '.','<sup>' }}</sup></b> <strike>{{ _product.compare_at_price | money | replace: '.','<sup>' }}</sup></strike>
+                        {% else %}
+                          <b>{{ _product.price | money }}</b> <strike>{{ _product.compare_at_price }}</strike>
+                        {% endif %}
+                      </span>
+                    </div>
+                    </div>
+                  </div>
+
+                  <div class="hidden tag-close right-10 top-10 md:top-6 md:right-6 cursor-pointer absolute" onclick="closeCard()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">    <path d="M31.202,25l13.63-20.445c0.204-0.307,0.224-0.701,0.05-1.026S44.369,3,44,3h-7.34c-0.327,0-0.634,0.16-0.821,0.429L25,19 L14.16,3.429C13.973,3.16,13.667,3,13.34,3H6C5.631,3,5.292,3.203,5.118,3.528s-0.154,0.72,0.05,1.026L18.798,25L5.168,45.445 c-0.204,0.307-0.224,0.701-0.05,1.026S5.631,47,6,47h7.34c0.327,0,0.634-0.16,0.821-0.429L25,31l10.84,15.571 C36.027,46.84,36.333,47,36.66,47H44c0.369,0,0.708-0.203,0.882-0.528s0.154-0.72-0.05-1.026L31.202,25z"></path></svg></div>
+                </div>
+              </div> 
+            {% endif %}
+          {% endfor %}
+
+          <div class="btn_wrapper">
+            <button class="btn  btn--white" data-bundle-customize>CUSTOMIZE</button>
+            <button class="btn" data-buy-bundle>BUY BUNDLE</button>
+          </div>
+        </div>
+        <div class="info_wrapper">
+          <div class="item_title">{{ collection.metafields.bundle.title[forloop.index0] }}</div>
+          <div class="item_desc">{{ collection.metafields.bundle.desc[forloop.index0] }}</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="popup popup-bundle custom-popup">
+    <div class="popup-wrapper">
+      <h2 class="popup-header">
+        YOUR BUNDLE
+        <div class="popup-close">{% render 'icon' with 'icon-minus' %}</div>
+      </h2>
+      <div class="popup-content"></div>
+      <div class="popup-footer d-flex flex-wrap items-center justify-between">
+        <div class="btn-wrapper"><button class="btn quick-add-to-bundle">ADD TO CART</button></div>
+        <div class="popup-footer-content d-flex items-center">
+          <div class="discount_percent text-right text-bold"></div>
+          <div class="price-wrapper">
+            <span class="compare_price"></span>
+            <span class="price"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div data-popup-bg></div>
+  </div>
+
+{% endif %}
+
+
+<style>
+  .goto-col svg{
+      transition: .5s ease;
+      fill: black;
+      stroke: black;
+  }
+  .goto-col:hover svg {
+      transform: translate(10px, 0);
+  }
+</style>
+<script>
+  function showCard(a) {
+      let card = document.getElementById(a);
+      card.classList.add('active');
+      let tag_card = $(card).find('.tag-card');
+     
+      for (var i = 0; i < tag_card.length; ++i) {
+        tag_card[i].classList.add('active');
+     }
+  }
+  function closeCard(a) {
+     
+      let card = document.getElementById(a);
+      let tag_card = $(card).find('.tag-card');
+     
+      for (var i = 0; i < tag_card.length; ++i) {
+        tag_card[i].classList.remove('active');
+     }
+    
+  }
+</script>

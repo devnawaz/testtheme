@@ -1,0 +1,549 @@
+$(document).ready(function() {
+    
+    $('.product-section[data-index=product1]').removeClass("hide");
+    $('.product-section[data-index=product1]').find('.slick-slider').slick('setPosition');
+    $('.bundle-content__product_input-wrap').on('click', function() {
+        var index = $(this).data('index');
+        $(this).closest('.bundle-collection__body').find('.product-section').each(function(i) {
+            if (!($(this).hasClass('hide'))) {
+               $(this).addClass("hide");
+            }
+        });
+        $('.product-section[data-index=' + index + ']').removeClass("hide");
+        $('.product-section[data-index=' + index + ']').find('.slick-slider').slick('setPosition');
+
+    })
+    $('.bundle-tab__item').on('click', function() {
+        var collectionId = $(this).data('collection-id');
+        $('.collection_bundlelist').each(function(i) {
+            if (!($(this).hasClass('hide'))) {
+               $(this).addClass("hide");
+            }
+        });
+        $('.bundle-tab__item').each(function() {
+            $(this).removeClass('active')
+        })
+        $(this).addClass('active')
+        $('.collection_bundlelist[data-collection-id=' + collectionId + ']').removeClass("hide");
+        $('.bundle-content__product_input-wrap[data-index=product1]').trigger('click')
+        $('.product-section[data-index=product1]').find('.slick-slider').slick('setPosition');
+    }) 
+
+
+    // Remove bundle item from list.
+
+    $(document).on('click', '.bundle__item .icon-close', function() {
+        var idx = parseInt($(this).closest('.bundle__item').attr('data-index'));
+        var product_select = $(this).closest('.bundle__item').attr('product-select')
+        var qty = $(this).closest('.bundle__item').attr('data-qty')
+        var count = 0, price = 0;
+        $(this).closest('#CollectionSection').find('.bundle-content__bundle_wrapper').each(function(__idx) {
+            var bundle_content = this
+            $(bundle_content).find('.bundle__item').each(function() {
+                var $item = $(this);
+                var item_idx = parseInt($item.attr('data-index'));
+                if(idx == item_idx) {
+                    deactiveBundleItem($item);
+                    $(bundle_content).find(".bundle-content__bundle_imageitem").each(function() {
+                        $(this).attr('next-data', item_idx)
+                    })
+                }
+                 if(item_idx >= idx && idx < 4) {
+                    var $next_item = $item.next();
+                    if($next_item.hasClass('active')) {
+                        $item.addClass('active').attr('data-variant-id', $next_item.attr('data-variant-id')).attr('data-qty', $next_item.attr('data-qty')).attr('data-variant-title', $next_item.attr('data-variant-title'))
+                        .attr('data-price', $next_item.attr('data-price')).attr('option-1', $next_item.attr('option-1')).attr('option-2', $next_item.attr('option-2'))
+                        .attr('option-3', $next_item.attr('option-3')).attr('options', $next_item.attr('options')).attr('variant-title', $next_item.attr('variant-title'))
+                        .attr('product-select', $next_item.attr('product-select'))
+                        $item.append($next_item.find('img'));
+                        deactiveBundleItem($next_item);
+                        $(bundle_content).find(".bundle-content__bundle_imageitem").each(function() {
+                            $(this).attr('next-data', parseInt($next_item.attr('data-index')))
+                        })
+                    }
+                }
+            })
+            if(__idx == 0) {
+                $(this).find('.bundle__item.active').each(function() {
+                    count ++;
+                    price += parseInt($(this).attr('data-price')) * parseInt($(this).attr('data-qty'));
+                })
+                var selection = $(`.bundle-tab__item[data-collection-id=${product_select}] .bundle-tab__item-count`)
+                var selected_quantity = parseInt(selection.attr('data-count')) - parseInt(qty)
+                selection.attr('data-count', selected_quantity)
+                if(selected_quantity == 0) {
+                    selection.text('')
+                    selection.addClass('hide')
+                } else if (selected_quantity > 0) {
+                    selection.text(selected_quantity)
+                    selection.removeClass('hide')
+                }
+            }
+        })
+        $(this).closest('#CollectionSection').find('form').each(function(idx) {
+            if($(this).find(".bundle-content__bundle_imageitem.active").length == 0) {
+                $(this).find('.bundle-content__bundle_wrapper .payment-buttons').addClass('hide')
+                $(this).find('.empty-bundle-text-container').removeClass('hide')
+              }
+            if($(this).find(".bundle-content__bundle_imageitem.active").length == 1) {
+                $(this).find('.bundle-content__bundle_wrapper .payment-buttons .add-bundle-to-cart').addClass('disable')
+                $(this).find('.bundle-content__bundle_wrapper .payment-buttons .add-bundle-to-cart').prop('disabled', true)
+              }
+        })
+        $('.collection_bundlelist').each(function() {
+            theme.Price.bundlePriceUpdate($(this), count, price);
+        })
+        
+    })
+
+    // Click customize button of bundle inspiration.
+
+    $(document).on('click', '[data-bundle-customize]', function() {
+        var $bundle_item = $(this).closest('.collection-bundle-inspiration-item');
+        var bundle_id = $bundle_item.attr('data-product-handle').split(',');
+        var collection_id = $bundle_item.attr('data-collection-id');
+        var $bundle_collection = $('.collection_bundlelist[data-collection-id="' + collection_id + '"]');
+
+        $('.bundle__item').each(function(){
+            deactiveBundleItem($(this));
+        })
+        $('.bundle__item').each(function(){
+            $(this).attr('next-data', 1)
+        })
+        $('.bundle-tab__item').each(function() {
+            $(this).find('.bundle-tab__item-count').attr('data-count', 0).text('').addClass('hide')
+        })
+
+        var count = 0, price = 0;
+
+        $bundle_collection.closest('#CollectionSection').find('form').each(function(idx) {
+            var $bundle = $(this).find('.bundle-content__bundle_imagelist');
+            var $productOpt;
+            $bundle.each(function(index) {
+                var bundle_list = $(this);
+                for(var i = 0; i < bundle_id.length; i ++) {
+                    // var $bundle_item = bundle_list.find('.bundle__item').eq(i);
+                    var next_to_fill = bundle_list.find('.bundle__item').eq(0).attr('next-data');
+                    // var next_to_fill = $(this).find(".bundle-content__bundle_imageitem").eq(0).attr('next-data');
+                    var $bundle_item = bundle_list.find(`.bundle__item[data-index=${next_to_fill}]`);
+                    $productOpt = $bundle_collection.find('.product-section[data-product-handle="' + bundle_id[i] + '"] .product-bundle__variants option:selected');
+                    $bundle_item.addClass('active').attr('data-variant-id', $productOpt.val()).attr('data-qty', 1).attr('data-price', $productOpt.attr('data-price')).attr('data-variant-title', $productOpt.attr('title')).attr('option-1', $productOpt.attr('variant-option-1')).attr('option-2', $productOpt.attr('variant-option-2')).attr('option-3', $productOpt.attr('variant-option-3')).attr('options', $productOpt.attr('options')).attr('product-select', $productOpt.attr('product-select'))
+                    if ((parseInt(next_to_fill) == 4)) {
+                        $(".bundle-content__bundle_imageitem").each(function() {
+                          $(this).attr('next-data', 1)
+                        })
+                      } else {
+                        $(".bundle-content__bundle_imageitem").each(function() {
+                          $(this).attr('next-data', parseInt(next_to_fill) + 1)
+                        })
+                      }
+                    $bundle_item.append('<img src="' + $productOpt.attr('data-image') + '">');
+                    
+                    if( index == 0 && idx == 0) {
+                        var product_select = $productOpt.attr('product-select')
+                        var selection = $(`.bundle-tab__item[data-collection-id=${product_select}] .bundle-tab__item-count`)
+                        var selected_quantity = parseInt(selection.attr('data-count')) + parseInt(1)
+                        selection.attr('data-count', selected_quantity)
+                        selection.text(selected_quantity).removeClass('hide')
+                    }
+                }
+            })
+
+            if(idx == 0){
+                $(this).find(".bundle-content__bundle_imageitem.active").each(function() {
+                    count ++;
+                    price += parseInt($(this).attr('data-price')) * parseInt($(this).attr('data-qty'));
+                })
+            }
+        
+        })
+
+        $('.bundle-tab__item[data-collection-id="' + collection_id + '"]').click();
+
+        $('.collection_bundlelist').each(function() {    
+            theme.Price.bundlePriceUpdate($(this), count, price);
+        })
+        
+    })
+
+    
+    // Remove bundle item added
+
+    function deactiveBundleItem($item) {
+        $item.removeClass('active').removeAttr('data-variant-id').removeAttr('data-qty').removeAttr('product-select');
+        $item.find('img').remove();
+    }
+
+
+    // Click Buy Bundle button of bundle inspiration.
+
+    $(document).on('click', '[data-buy-bundle]', function() {
+        var $bundle_item = $(this).closest('.collection-bundle-inspiration-item');
+        var bundle_id = $bundle_item.attr('data-product-handle').split(',');
+        var collection_id = $bundle_item.attr('data-collection-id');
+        var content_htm = '';
+        var price = 0, count =0
+        for(var i = 0; i < bundle_id.length; i ++) {
+            var bundle_item_data = bundle_item_arr[bundle_id[i]];
+            var item_htm = `<div class="atc_bundle_item d-flex" data-id=${bundle_item_data.id} data-price=${bundle_item_data.price} data-variant-title=${bundle_item_data.title}>`;
+            item_htm += '<div class="image_wrapper">';
+            item_htm += '<img src="' + bundle_item_data.img_src + '">';
+            item_htm += '</div>';
+            item_htm += '<div class="item_info">'
+            item_htm += '<div class="item_title"> 1 x ' + bundle_item_data.title + '</div>';
+            if(bundle_item_data.options.length > 0) {
+                item_htm += '<div class="item_options">';
+            }
+            for(var j = 0; j < bundle_item_data.options.length; j ++) {
+                item_htm += '<span>' + bundle_item_data.options[j] + ': ' + bundle_item_data['option' + (j + 1)] + '</span>';
+            }
+            if(bundle_item_data.options.length > 0) {
+                item_htm += '</div>';
+            }
+            item_htm += '</div>';
+            item_htm += '<div class="item_remove"><button><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 371.23 371.23" style="enable-background:new 0 0 371.23 371.23;" xml:space="preserve"><polygon points="371.23,21.213 350.018,0 185.615,164.402 21.213,0 0,21.213 164.402,185.615 0,350.018 21.213,371.23   185.615,206.828 350.018,371.23 371.23,350.018 206.828,185.615 "/></svg></button><div class="edit-popup">Edit</div></div>';
+            item_htm += '</div>';
+            content_htm += item_htm;
+            price += bundle_item_data.price
+            count += 1
+        }
+        $('.popup-bundle .popup-content').html(content_htm);
+        popupPriceUpdate();
+        popup_open($(".popup-bundle"));
+    })
+
+    
+    // Remove bundle popup item
+
+    $(document).on('click', '.atc_bundle_item .item_remove-product button', function() {
+        var idx = parseInt($(this).attr('data-index'));
+        var count = 0, price = 0;
+        $(this).closest('#CollectionSection').find('.bundle-content__bundle_wrapper').each(function(__idx) {
+            var bundle_content = this
+            $(bundle_content).find('.bundle__item').each(function(index) {
+                var $item = $(this);
+                var item_idx = parseInt($item.attr('data-index'));
+                if(idx == item_idx) {
+                    deactiveBundleItem($item);
+                    $(bundle_content).find(".bundle-content__bundle_imageitem").each(function() {
+                        $(this).attr('next-data', item_idx)
+                    })
+                      
+                }
+                if(item_idx >= idx && idx < 4) {
+                    var $next_item = $item.next();
+                    if($next_item.hasClass('active')) {
+                        $item.addClass('active').attr('data-variant-id', $next_item.attr('data-variant-id')).attr('data-qty', $next_item.attr('data-qty')).attr('data-variant-title', $next_item.attr('data-variant-title'))
+                        .attr('data-price', $next_item.attr('data-price')).attr('option-1', $next_item.attr('option-1')).attr('option-2', $next_item.attr('option-2'))
+                        .attr('option-3', $next_item.attr('option-3')).attr('options', $next_item.attr('options')).attr('variant-title', $next_item.attr('variant-title'))
+                        .attr('product-select', $next_item.attr('product-select'))
+                        $item.append($next_item.find('img'));
+                        deactiveBundleItem($next_item);
+
+                        $(bundle_content).find(".bundle-content__bundle_imageitem").each(function() {
+                            $(this).attr('next-data', parseInt($next_item.attr('data-index')))
+                        })
+                        
+                    }
+                }
+            
+            })
+            if(__idx == 0) {
+                $(this).find('.bundle__item.active').each(function() {
+                    count ++;
+                    price += parseInt($(this).attr('data-price')) * parseInt($(this).attr('data-qty'));
+                })
+            }
+        })
+
+        $(this).closest('#CollectionSection').find('form').each(function(idx) {
+            if($(this).find(".bundle-content__bundle_imageitem.active").length == 0) {
+                $(this).find('.bundle-content__bundle_wrapper .payment-buttons').addClass('hide')
+                $(this).find('.empty-bundle-text-container').removeClass('hide')
+              }
+            if($(this).find(".bundle-content__bundle_imageitem.active").length == 1) {
+                $(this).find('.bundle-content__bundle_wrapper .payment-buttons .add-bundle-to-cart').addClass('disable')
+                $(this).find('.bundle-content__bundle_wrapper .payment-buttons .add-bundle-to-cart').prop('disabled', true)
+              }
+        })
+
+        var product_select = $(this).attr('product-select')
+        var qty = $(this).attr('data-qty')
+        var selection = $(`.bundle-tab__item[data-collection-id=${product_select}] .bundle-tab__item-count`)
+        var selected_quantity = parseInt(selection.attr('data-count')) - parseInt(qty)
+        selection.attr('data-count', selected_quantity)
+        if(selected_quantity == 0) {
+            selection.text('')
+            selection.addClass('hide')
+        } else if (selected_quantity > 0) {
+            selection.text(selected_quantity)
+            selection.removeClass('hide')
+        }
+        
+        popupPriceUpdateProduct($(this).closest('.popup-bundle'), count, price)
+
+        $('.collection_bundlelist').each(function() {
+            theme.Price.bundlePriceUpdate($(this), count, price);
+        })
+        
+
+        $('.popup-bundle-product').each(function() {
+           $(this).find('.atc_bundle_item .item_remove-product button').each(function() {
+               if(idx == parseInt($(this).attr('data-index'))) {
+                    $(this).closest('.atc_bundle_item').remove();
+               }
+           })
+           $(this).find('.atc_bundle_item .item_remove-product button').each(function(index) {
+                $(this).attr('data-index', index + 1)
+           })
+        })
+        
+    })
+
+    $(document).on('click', '.atc_bundle_item .item_remove button', function() {
+        var attr = $(this).closest('.atc_bundle_item').attr('data-id')
+        $('.atc_bundle_item').each(function() {
+            if($(this).attr('data-id') == attr) {
+                $(this).remove()
+            }
+        }
+        );
+        popupPriceUpdate();
+    })
+
+    function popupPriceUpdate() {
+        var bundle_price = 0;
+        var bundle = $('.popup-bundle')
+        bundle.each(function() {
+            var bundleItems = $(this).find('.atc_bundle_item')
+            var discount_percent = 0
+                if (bundleItems.length > 1) {
+                    discount_percent = (bundleItems.length - 1) * 5
+                }
+        
+                bundleItems.each(function() {
+                    bundle_price += parseInt($(this).attr('data-price').trim());
+                });
+                
+                var discount_text = discount_percent + '% OFF';
+                var compare_price = theme.Currency.formatMoney(bundle_price/10, theme.settings.moneyFormat);
+                
+                if(discount_percent == 0) {
+                    discount_text = '';
+                    compare_price = '';
+                }
+                $('.popup-bundle .discount_percent').text(discount_text);
+                $('.popup-bundle .compare_price').text(compare_price);
+                $('.popup-bundle .price').text(theme.Currency.formatMoney(bundle_price/10 * (100 - discount_percent)/100, theme.settings.moneyFormat));
+        })
+    
+    }
+    
+
+    $(document).on('click', '.popup-close', function() {
+        $('.popup-bundle .popup-content').each(function() {
+            popup_hide($(this).closest('.popup'));
+        })
+        
+    })
+    $(document).on('click', '.popup-close-product', function() {
+        $('.popup-bundle .popup-content').each(function() {
+            popup_hide($(this).closest('.popup'));
+        })
+    })
+
+    function popupPriceUpdateProduct($collection, __count, __price) {
+        var $comparePrice = $('.popup-footer-content .compare_price');
+        var $price = $('.popup-footer-content .price');
+        var $discount_percent = $('.popup-footer-content .discount_percent');
+        var percent = 0, comparePrice = '', price = 0;
+        if(__count > 1) {
+          percent = (__count - 1) * 5;
+          comparePrice = theme.Currency.formatMoney(__price, theme.settings.moneyFormat);
+        }
+  
+        price = __price * (100 - percent) / 100;
+        var price_text = theme.Currency.formatMoney(price, theme.settings.moneyFormat);
+        if(price == 0) {
+          price_text = '';
+        }
+  
+        var percent_text = percent + '% OFF';
+        if(percent == 0) {
+          percent_text = '';
+        }
+  
+        $discount_percent.text(percent_text);
+        $comparePrice.text(comparePrice);
+        $price.text(price_text);
+      }
+
+    // Popup
+
+    function popup_open($popup) {
+        
+        $popup.show();
+        setTimeout(function() {
+            $popup.addClass('active');
+        });
+    }
+
+    function popup_hide($popup) {
+        
+        $popup.removeClass('active');
+        setTimeout(function() {
+            $popup.hide();
+        }, 350);
+    }
+
+
+
+//    $('.add-item-to-bundle').on('click', function() {
+//         var index = $(this).data('index');
+//         var tabindex = $(this).data('tab-index');
+//         var qty = $(this).closest('.bundle-content__qty_wrapper').find('input').val();
+//         var $option = $('.product-bundle__variants[data-index=' + index + '][data-tab-index=' + tabindex + ']').find(":selected");
+//         var variant_id = $option.val();
+//         var img_url = $option.attr('data-image');
+//         var cart_obj = {};
+//         var key = variant_id;
+//         cart_obj[key] = parseInt(qty);
+//         bundle_img_urls.push(img_url);
+//         bundle_cart_array.push(cart_obj);
+//         $.each(bundle_cart_array, function(index, item) {
+//             $.extend(bundle_cart_objs, item);
+//         });
+//         bundle_img_urls.map((item) => {
+//             var $target = $(this).closest('form').find(".bundle-content__bundle_imageitem:not(.active)").eq(0);
+//             $target.append('<img src="' + item + '">');
+//             $target.addClass('active');
+//         })
+ 
+
+//    })
+
+
+	$('#removeBundle').on('click', function() {
+		bundle_id = $('#removeBundle').attr('bundle-id')
+		theme.cart.getCart().then(response => {
+			var ItemsofBundle = response.items.filter(item => item.properties?.bundle_id == bundle_id)
+			var bundle_items = {};
+			ItemsofBundle.forEach(item => {
+				bundle_items[item.variant_id] = 0;         
+			})
+			var formData = {
+				updates: bundle_items
+			};
+			fetch('/cart/update.js', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(formData)
+			})
+			.then(response => {
+				window.location.reload()
+			})
+			.catch((error) => {
+				console.error('Error:', error);
+			});   
+		})
+	})
+
+	// original price cross
+
+	var cartBundleOriginalprice = $(".medium-up--text-right .bundle-item-price")
+	var cartBundleOriginalpriceRight = $(".text-right .bundle-item-price")
+	theme.cart.getCart().then(response => {
+		showprice(cartBundleOriginalprice, response, true)
+		showprice(cartBundleOriginalpriceRight, response)
+	})
+
+	// discount price
+
+
+	var cartBundleDiscountprice = $(".medium-up--text-right .bundle-item-discount-price")
+	$('.cart__product-qty').on('focusin', function(){
+    $(this).data('val', $(this).val());
+});
+
+
+	theme.cart.getCart().then(response => {
+		// quantityChange 
+		
+		$(".cart__product-qty").change(function() {
+			var prev = $(this).data('val');
+			quantityChange(this, response)
+		})
+
+		
+	})
+
+	function quantityChange(el, cart) {
+		var prev = $(el).data('val');
+		var updatedquantity = $(el).val();
+		var bundle_id = $(el).attr('bundle-id')
+		
+		var bundleitems = cart.items.filter(item => item.properties?.bundle_id == bundle_id && item.id != 39477865349216)
+		$(".cart__product-qty").each(function() {
+			var bundle_id2= $(this).attr('bundle-id')
+			if (bundle_id2 == bundle_id && this != el) {
+				var product_id = $(this).attr('product-id')
+				var products = bundleitems.filter(item => {
+					return item.id.toString() == product_id.toString()
+				})
+				if (products.length != 0) {
+					var newVal = parseInt(updatedquantity) - parseInt(prev)
+					var newbundleProductQty = parseInt(products[0].quantity) + newVal
+					$(this).val(newbundleProductQty.toString())
+				}
+			}
+			
+		})
+	}
+
+	function showprice(cartBundleOriginalprice, response, left) {
+		cartBundleOriginalprice.each(function () {
+			var bundle_id = $(this).attr('bundle-id')
+			var bundleitems = response.items.filter(item => item.properties?.bundle_id == bundle_id && item.id != 39477865349216)
+			var price = 0;
+			var quantity = 0
+			bundleitems.forEach(item => {
+				quantity = quantity + item.quantity
+			})
+			bundleitems.forEach(item => {
+				if (quantity > 1) {
+					price = price + item.discounted_price * item.quantity
+				} else {
+					price = price + item.price*item.quantity
+				}
+			})
+		
+			price = theme.Price.getBundlePrice(quantity, price);
+			price = theme.Currency.formatMoney(price, theme.settings.moneyFormat)
+			$(this).text(price)
+		})
+	}
+    $(document).on('click', '.edit-popup', function(){ 
+        $('[data-bundle-customize]').trigger('click')
+        $('.popup').trigger('click')
+        $('.popup').removeClass('active')
+        $('.popup').hide()
+        
+   });
+    $(document).on('click', '.edit-popup-product', function(){ 
+        $('.popup-close-product').trigger('click')
+        
+   });
+    $(document).on('click', '.quick-add-to-bundle-product', function(){
+        console.log("length---")
+        $($('.add-bundle-to-cart')[0]).trigger('click')
+   });
+ 
+    // $('.edit-popup').on('click', function() {
+        
+    // })
+
+	// quantity change 
+
+})

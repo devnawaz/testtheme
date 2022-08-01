@@ -1,0 +1,212 @@
+{{ 'tagging.css' | asset_url | stylesheet_tag }}
+
+
+<div class="page-width">
+  <div class="main_wrapper d-flex justify-between">
+    <div class="tagging mt-40 block lg:flex max-w-screen-2xl px-2 mx-auto">
+        <div class="tagging-bg h-full relative">
+            <img style="height: {{ section.settings.size }};" class="w-full" src="{{ section.settings.bg_img | img_url: '1200x' }}" alt="" onclick="closeCard()">
+            {% for block in section.blocks %}
+              {% if block.settings.item.title != null and block.type == 'tag' %}    
+                <div style="
+                top:{{ block.settings.btn_ypos }}%;
+                left:{{ block.settings.btn_xpos }}%
+                " class="tag-btn absolute" onmouseenter="showCard('card-{{ forloop.index }}')"> </div>
+                <div id="card-{{ forloop.index }}" class="tag-card" style="top:{{ block.settings.btn_ypos }}%;
+                left:{{ block.settings.btn_xpos }}%;
+                transform: translate({% if block.settings.btn_xpos > 12 and block.settings.btn_xpos < 50 %}-10vw{% elsif block.settings.btn_xpos >= 50 %}-190px{% else %}-0px{% endif %}, {% if block.settings.btn_ypos > 50 %}-80px{% else %}-10px{% endif %});
+                ">
+                <div class="card-content flex flex-col items-start justify-between px-10 py-5">
+                    <div class="content-right flex w-full items-center">
+                        <span class="text-2xl">
+                            <b>{{ block.settings.item.title }}</b>
+                        </span>
+                        <a href="{{ block.settings.item.url }}" target="_blank" class="ml-10">
+                            <svg width="12" height="18" viewBox="0 0 12 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2.21624 0L0 2.115L7.19886 9L0 15.885L2.21624 18L11.6471 9L2.21624 0Z" fill="black" />
+                            </svg>  
+                        </a>
+                    </div>
+                    <div class="text-center mt-3">
+                        <span class="text-xl">
+                            {% if settings.cents_format == true %}
+                            <b>{{ block.settings.item.price | money | replace: '.','<sup>' }}</sup></b> <strike>{{ block.settings.item.compare_at_price | money | replace: '.','<sup>' }}</sup></strike>
+                            {% else %}
+                            <b>{{ block.settings.item.price | money }}</b> <strike>{{ block.settings.item.compare_at_price }}</strike>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="hidden tag-close right-10 top-10 md:top-6 md:right-6 cursor-pointer absolute" onclick="closeCard()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50">    <path d="M31.202,25l13.63-20.445c0.204-0.307,0.224-0.701,0.05-1.026S44.369,3,44,3h-7.34c-0.327,0-0.634,0.16-0.821,0.429L25,19 L14.16,3.429C13.973,3.16,13.667,3,13.34,3H6C5.631,3,5.292,3.203,5.118,3.528s-0.154,0.72,0.05,1.026L18.798,25L5.168,45.445 c-0.204,0.307-0.224,0.701-0.05,1.026S5.631,47,6,47h7.34c0.327,0,0.634-0.16,0.821-0.429L25,31l10.84,15.571 C36.027,46.84,36.333,47,36.66,47H44c0.369,0,0.708-0.203,0.882-0.528s0.154-0.72-0.05-1.026L31.202,25z"></path></svg></div>
+                </div>
+                </div>    
+              {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="tiles-wrapper d-flex flex-wrap justify-between" data-aos>
+      {% for block in section.blocks %}
+        {% if block.type == 'tile' %}
+          <div class="tile text-center">
+            <div class="image_wrapper">{% render 'rimage', image: block.settings.product.featured_image %}</div>
+            <div class="info_wrapper">
+              <div class="tile_title">{{ block.settings.product.title }}</div>
+              <div class="tile_price">{{ block.settings.product.price | money }}</div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<style>
+    {% if hasColumn == false %}
+    .tagging-bg {
+        max-width: {{ section.settings.image_width }};
+        width: 100%;
+    }
+    {% endif %}
+    .goto-col svg{
+        transition: .5s ease;
+        fill: black;
+        stroke: black;
+    }
+    .goto-col:hover svg {
+        transform: translate(10px, 0);
+    }
+</style>
+<script>
+    function showCard(a) {
+        let old = document.querySelector('.tag-card.active');
+        let card = document.getElementById(a);
+        if(old) {
+            old.classList.remove('active');
+        }
+        card.classList.add('active');
+    }
+    function closeCard() {
+        let old = document.querySelector('.tag-card.active');
+        old.classList.remove('active');
+    }
+</script>
+
+{% schema %}
+{
+  "name": "Image Hotspots",
+  "tag": "section",
+  "class": "section-image-hotspots",
+  "settings": [
+    {
+        "type": "select",
+        "id": "size",
+        "options": [
+            {
+                "value": "auto",
+                "label": "auto"
+            },
+            {
+                "value": "400px",
+                "label": "400px"
+            },
+            {
+                "value": "500px",
+                "label": "500px"
+            },
+            {
+                "value": "600px",
+                "label": "600px"
+            },
+            {
+                "value": "700px",
+                "label": "700px"
+            }
+        ],
+        "default": "400px",
+        "label": "Image height"
+    },
+    {
+        "type": "select",
+        "id": "image_width",
+        "options": [
+            {
+                "value": "600px",
+                "label": "600px"
+            },
+            {
+                "value": "800px",
+                "label": "800px"
+            },
+            {
+                "value": "1000px",
+                "label": "1000px"
+            },
+            {
+                "value": "1200px",
+                "label": "1200px"
+            },
+            {
+                "value": "100%",
+                "label": "Full"
+            }
+        ],
+        "default": "1000px",
+        "label": "Image width"
+    },
+    {
+        "type": "image_picker",
+        "id": "bg_img",
+        "label": "Image"
+    },
+    {
+        "type": "image_picker",
+        "id": "bg_img_mobile",
+        "label": "Mobile Image"
+    }
+  ],
+  "blocks": [
+    {
+        "type": "tag",
+        "name": "Tag",
+        "settings": [
+            {
+                "type": "product",
+                "id": "item",
+                "label": "Product"
+            },
+            {
+                "type": "range",
+                "id": "btn_ypos",
+                "min": 0,
+                "max": 100,
+                "step": 1,
+                "unit": "%",
+                "default": 25,
+                "label": "Button vertical position"
+            },
+            {
+                "type": "range",
+                "id": "btn_xpos",
+                "min": 0,
+                "max": 100,
+                "step": 1,
+                "unit": "%",
+                "default": 25,
+                "label": "Button horizontal position"
+            }
+        ]
+    },
+    {
+        "type": "tile",
+        "name": "Tile",
+        "limit": 4,
+        "settings": [
+            {
+              "type": "product",
+              "id": "product",
+              "label": "Product"
+            }
+        ]
+    }
+  ]
+}
+{% endschema %}

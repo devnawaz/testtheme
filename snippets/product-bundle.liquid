@@ -1,0 +1,194 @@
+{%- liquid
+    assign current_variant = product.selected_or_first_available_variant
+  
+    unless thumbnail_position
+      assign thumbnail_position = 'beside'
+    endunless
+  
+    unless description_style
+      assign description_style = 'full'
+    endunless
+  
+    assign product_zoom_size = '1800x1800'
+    assign product_image_size = '620x'
+  
+    case image_container_width
+      when 'small'
+        assign product_image_width = 'widescreen--one-half'
+        assign product_description_width = 'widescreen--one-half'
+        assign product_image_size = '480x'
+      when 'medium'
+        assign product_image_width = 'medium-up--one-half'
+        assign product_description_width = 'medium-up--one-half'
+        assign product_image_size = '620x'
+      when 'large'
+        assign product_image_width = 'widescreen--one-half'
+        assign product_description_width = 'widescreen--one-half'
+        assign product_image_size = '740x'
+    endcase
+  
+    assign product_img_structure = product.featured_media | img_url: '1x1' | replace: '_1x1.', '_{width}x.'
+  -%}
+  
+  {% assign __featuredImg = product.selected_or_first_available_variant.image | default: product.featured_image %}
+
+  <script>
+    var __bundle_item = {
+      'id': {{ product.selected_or_first_available_variant.id | json }},
+      'title': {{ product.title | json }},
+      'price': {{ product.selected_or_first_available_variant.price | json }},
+      'img_src': {{ __featuredImg | img_url: '150x' | json }},
+      'options': {{ product.options | json }},
+      'option1': {{ product.selected_or_first_available_variant.option1 | json }},
+      'option2': {{ product.selected_or_first_available_variant.option2 | json }},
+      'option3': {{ product.selected_or_first_available_variant.option3 | json }}
+    }
+    bundle_item_arr["{{ product.handle }}"] = __bundle_item;
+  </script>
+
+  <div id="ProductSection-{{ section_id }}"
+    class="product-section hide"
+    data-section-id="{{ section_id }}"
+    data-section-type="product-bundle"
+    data-product-handle="{{ product.handle }}"
+    data-product-title="{{ product.title | escape }}"
+    data-product-url="{{ product.url | within: collection }}"
+    data-aspect-ratio="{{ 100 | divided_by: product.featured_media.aspect_ratio }}"
+    data-featured-image="{{ __featuredImg | img_url: '150x' }}"
+    data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+    data-img-url="{{ product_img_structure }}"
+    data-index="product{{ index }}"
+    {% if settings.product_zoom_enable %}
+      data-image-zoom="true"
+    {% endif %}
+    {% if settings.inventory_enable %}
+      data-inventory="true"
+    {% endif %}
+    {% if settings.inventory_transfers_enable %}
+      data-incoming-inventory="true"
+    {% endif %}
+    {% unless isModal %}
+      data-enable-history-state="true"
+    {% endunless %}>
+  
+  
+    <div class="page-content page-content--product">
+      <div class="custom-product-single bundle-page">
+  
+        <div class="grid{% unless image_position == 'left' %} grid--product-images-right{% endunless %}">
+          {%- if image_position == 'left' -%}
+            <div class="grid__item {{ product_image_width }} product-single__sticky">
+              {%- render 'product-images',
+                section_id: section_id,
+                product: product,
+                isModal: isModal,
+                image_position: image_position,
+                product_zoom_size: product_zoom_size,
+                product_image_size: product_image_size,
+                thumbnail_arrows: thumbnail_arrows,
+                thumbnail_position: thumbnail_position,
+                video_looping: video_looping,
+                video_style: video_style
+              -%}
+            </div>
+          {%- endif -%}
+  
+          <div class="grid__item {{ product_description_width }}">
+  
+            <div class="product-single__meta">
+  
+              {%- if settings.vendor_enable -%}
+                <div class="product-single__vendor">
+                  {%- assign vendor_handle = product.vendor | handleize -%}
+                  {%- if collections[vendor_handle] != empty -%}
+                    <a href="{{ routes.collections_url }}/{{ collections[vendor_handle].handle }}">
+                      {{ collections[vendor_handle].title }}
+                    </a>
+                  {%- else -%}
+                    {{ product.vendor | link_to_vendor }}
+                  {%- endif -%}
+                </div>
+              {%- endif -%} 
+
+              {%- if settings.sku_enable -%}
+                <p id="Sku-{{ section_id }}" class="product-single__sku">
+                  {%- if current_variant.sku -%}
+                    {{ current_variant.sku }}
+                  {%- endif -%}
+                </p>
+              {%- endif -%}
+              <label class="bundle-content__product_title" for="ProductSelect-{{ section_id }}-option-{{ 2 }}">
+                {{title}}
+              </label>
+              <div class="bundle-content__product_wrapper">
+                {% for item in products %}
+                {%- assign product_index = forloop.index -%}
+                  <fieldset class="variant-input-wrap bundle-content__product_input-wrap"
+                    data-index="product{{ product_index }}"
+                    name="sheet"
+                    data-handle="sheet"
+                    id="CollectionSelect-{{ section_id }}-option-{{ forloop.index0 }}"
+                  >
+                    <legend class="hide">sheet</legend>
+                    <div 
+                      class="variant-input"
+                      data-index="option{{ product_index }}"
+                    >
+                      <input type="radio"
+                        {% if item.id == section_id %} checked="checked"{% endif %}
+                        value="{{ item.title | escape }}"
+                        data-index="option{{ product_index }}"
+                        class="product__input-{{ section_id }}"
+                      >
+                      <label
+                        for="ProductSelect-{{ section_id }}-option-sheet-{{ value | url_encode }}"
+                        class="variant__button-label">{{ item.title | escape }}</label>
+                    </div>
+                  </fieldset>
+                {% endfor %}
+              </div>
+              {%- render 'product-bundle-form',
+                section_id: section_id,
+                product: product,
+                current_variant: current_variant,
+                index: index,
+                tab_index: tab_index
+                data_collection_id: data_collection_id
+              -%}
+              
+              {%- if settings.surface_pickup_enable -%}
+                <div id="StoreAvailabilityHolder-{{ section_id }}"
+                  data-product-name="{{ product.title | escape }}"
+                  data-base-url="{{ shop.url }}{{ routes.root_url }}"
+                  ></div>
+              {%- endif -%}
+             
+            </div>
+          </div>
+  
+          {%- unless image_position == 'left' -%}
+            <div class="grid__item {{ product_image_width }} product-single__sticky">
+              {%- render 'product-images',
+                section_id: section_id,
+                product: product,
+                isModal: isModal,
+                image_position: image_position,
+                product_zoom_size: product_zoom_size,
+                product_image_size: product_image_size,
+                thumbnail_arrows: thumbnail_arrows,
+                thumbnail_position: thumbnail_position,
+                video_looping: video_looping,
+                video_style: video_style
+              -%}
+            </div>
+          {%- endunless -%}
+        </div>
+        {%- if description_style == 'full' -%}
+          <div class="product-single__description-full rte">
+            {{ product.description }}
+          </div>
+          {%- render 'product-additional-content', product: product, section_id: section_id -%}
+        {%- endif -%}
+      </div>
+    </div>
+  </div>

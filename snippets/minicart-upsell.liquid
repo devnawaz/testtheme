@@ -1,0 +1,355 @@
+
+{% comment %}
+{{ '//cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.0/animate.min.css' | stylesheet_tag }}
+{% endcomment %}
+{{ '//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css' | stylesheet_tag }}
+
+<style>  
+.ajaxified-cart-feedback {
+  display: block;
+  line-height: 36px;
+  font-size: 90%;
+  vertical-align: middle;
+}
+.ajaxified-cart-feedback.success { 
+  color: #3D9970;
+}
+.ajaxified-cart-feedback.error { 
+  color: #FF4136; 
+} 
+.ajaxified-cart-feedback a {
+  border-bottom: 1px solid;
+}
+</style>
+<style>
+  .cart-upsells {
+  	background: #f2f2f2;
+    padding: 25px 25px 5px;
+    margin-bottom: 25px;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .prismfly-plugin select {
+  	font-size: 11px!important;
+    padding: 0 5px;
+    width: 100%;
+    outline: #e8e8e1;
+    background-position: right 5px center!important;
+    background-size: 8px!important;
+  }
+  .prismfly-plugin select:focus {
+  	font-size: 11px!important;
+    border: solid 1px #e8e8e1;
+  }
+  
+  .prismfly-plugin input {
+	padding: 3px 10px;
+    font-size: 12px!important;
+    text-transform: uppercase;
+    margin-top: 10px;
+    background: #000;
+    color: #fff;
+  }
+  
+  .prismfly-plugin .design-pre-order-template-wrapper.bottom-direction {
+    align-items: baseline;
+    text-align: left;
+  }
+  .prismfly-plugin .design-pre-order-template-wrapper [data-editable="pre-order-button"] {
+	padding: 5px 10px;
+    font-size: 12px!important;
+    text-transform: uppercase;
+    margin-top: 10px;
+    background: #000;
+    color: #fff;
+    font-style: normal;
+  }
+  .prismfly-plugin .hover {
+	padding: 5px 10px;
+    font-size: 12px!important;
+    text-transform: uppercase;
+    margin-top: 10px;
+    background: #000;
+    color: #fff;
+    font-style: normal;
+  }
+  .prismfly-plugin .pre-order-2-message {
+  	padding: 0 5px;
+  }
+  .prismfly-plugin {
+  /*	border-top: solid 1px #e8e8e1; */
+  }
+  .prismfly-plugin .ajaxcart__row {
+  	margin-bottom: 0;
+  }
+  .cartupsell {
+  	background-color: #f7f7f7;
+  }
+  .cart-upsell:first-child {
+  	display: none;
+  }
+  .cart-upsell__image_img {
+  	border-color: #bfbfbf;
+	border-style: solid;
+	border-width: thin;
+  }
+  .cart-upsell .filler {
+  	position: relative;
+  }
+  @media only screen and (max-width:768px) {
+    .drawer--right {
+        width: 350px;
+    }
+  }
+</style>
+
+{% assign limit = 100 | plus: 0 %} 
+{% assign upsell_limit = 1 | plus: 0 %}
+{% capture cart_handles %}{% for item in cart.items %}{{item.product.handle}}{%unless forloop.last%},{%endunless%}{% endfor %}{% endcapture %}
+{% assign cart_handles = cart_handles | split: ',' | uniq | join: ',' %}
+{% assign upsell_handles = '' %}  
+  
+{% assign mycollection = settings.upsell_collection %}
+{% for product in collections[mycollection].products %}
+ 	
+       {% assign item_upsell_handles = product.handle | split: '|' %}
+       {% for upsell in item_upsell_handles %}
+       {% assign upsell = upsell %}
+       {% unless cart_handles contains upsell %}
+          {% capture upsell_handles %}{% unless upsell_handles == blank %}{{upsell_handles}},{% endunless %}{{upsell}}{%endcapture%}
+       {% endunless %}
+       {% endfor %}
+  
+{% endfor %}
+
+
+
+{% assign upsell_handles = upsell_handles | split: ',' %}
+{% if upsell_handles != blank %}
+<div class="prismfly-plugin appear-animation appear-delay-11" style="display: none;">
+  <div class="cart-upsells">
+  
+    {% for upsell_handle in upsell_handles %}
+      {% unless forloop.index > upsell_limit %}
+        {% assign upsell_product = all_products[upsell_handle] %}
+        {% assign extra_index = forloop.index %}
+        {% if upsell_product != blank %}
+    	{% if upsell_product.available %}
+    	<h4 style="margin-bottom: 6px;">You may also like:</h4>
+          <div class="cart-upsell cart-upsell__{{ forloop.index }} clearfix ajaxcart__product appear-animation appear-delay-3">
+
+  		 <form method="post" action="/cart/add" accept-charset="UTF-8" class="product-single__form test" enctype="multipart/form-data">
+
+             <div class="ajaxcart__row">
+               <div class="grid">
+                <div class="cart-upsell__image grid__item one-third">
+                  <a href="{{ upsell_product.url  }}">
+                      <img src="{{ upsell_product.featured_image | product_img_url: 'grande' }}" alt="{{ upsell_product.title | escape  }}" class="cart-upsell__image_img" />
+                  </a>
+                </div>
+                {% assign current_upsell_variant = upsell_product.selected_or_first_available_variant %}
+                <div class="cart-upsell__title grid__item two-thirds">
+                  <div class="ajaxcart__product-name--wrapper">
+                   <a href="{{ upsell_product.url }}" class="clearfix">
+                      <a class="ajaxcart__product-name" href= "{{ upsell_product.url }}">{{ upsell_product.title | truncate: 30 }}</a>
+                      {% if settings.product_vendor %}
+                          <span class="vendor">{{ upsell_product.vendor }}</span>
+                      {% endif %}
+                   </a>
+                    <div class="grid grid--full">
+                    <div class="grid__item display-table-cell one-whole filler">
+                      <select name="id">
+                        {% for variant in upsell_product.variants %}
+                          {% if variant.available %}
+                          <option value="{{ variant.id }}">{{ variant.title }} - {{ variant.price | money }}</option>
+                          {% else %}
+                          <option disabled="disabled">{{ variant.title }} - Sold Out</option>
+                          {% endif %}
+                        {% endfor %}
+                    </select>
+                      <input id="AddToCart" class="add-to-cart ajaxcart" type="submit" value="ADD TO CART" aria-controls="CartDrawer" />
+                    </div>
+                  </div>
+                    
+                  </div>
+                  
+                </div>
+               </div>
+          </div>
+            </form>
+
+          </div>
+    	{% endif %}
+        {% endif %}
+      {% endunless %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+
+
+<script>
+Shopify.AjaxifyCart = (function($) {
+  
+  // Some configuration options.
+  // I have separated what you will never need to change from what
+  // you might change.
+  
+  var _config = {
+    
+    // What you might want to change
+    addToCartBtnLabel:             'Add to cart',
+    addedToCartBtnLabel:           'Thank you!',
+    addingToCartBtnLabel:          'Adding...',
+    soldOutBtnLabel:               'Sold Out',
+    howLongTillBtnReturnsToNormal: 1000, // in milliseconds.
+    cartCountSelector:             '.cart-count, #cart-count a:first, #gocart p a, #cart .checkout em, .item-count',
+    cartTotalSelector:             '#cart-price',
+    // 'aboveForm' for top of add to cart form, 
+    // 'belowForm' for below the add to cart form, and 
+    // 'nextButton' for next to add to cart button.
+    feedbackPosition:              'nextButton',
+    
+    // What you will never need to change
+    addToCartBtnSelector:          '[type="submit"]',
+    addToCartFormSelector:         'form[action="/cart/add"]',
+    shopifyAjaxAddURL:             '/cart/add.js',
+    shopifyAjaxCartURL:            '/cart.js'
+  };
+  
+  // We need some feedback when adding an item to the cart.
+  // Here it is.  
+  var _showFeedback = function(success, html, $addToCartForm) {
+    $('.ajaxified-cart-feedback').remove();
+  };
+  var _setText = function($button, label) {
+    if ($button.children().length) {
+      $button.children().each(function() {
+        if ($.trim($(this).text()) !== '') {
+          $(this).text(label);
+        }
+      });
+    }
+    else {
+      $button.val(label).text(label);
+    }
+  };
+  var _init = function() {   
+    $(document).ready(function() { 
+      $(_config.addToCartFormSelector).submit(function(e) {
+        e.preventDefault();
+        var $addToCartForm = $(this);
+        var $addToCartBtn = $addToCartForm.find(_config.addToCartBtnSelector);
+        _setText($addToCartBtn, _config.addingToCartBtnLabel);
+        $addToCartBtn.addClass('disabled').prop('disabled', true);
+        // Add to cart.
+        $.ajax({
+          url: _config.shopifyAjaxAddURL,
+          dataType: 'json',
+          type: 'post',
+          data: $addToCartForm.serialize(),
+          success: function(itemData) {
+            // Re-enable add to cart button.
+            $addToCartBtn.addClass('inverted');
+            _setText($addToCartBtn, _config.addedToCartBtnLabel);
+            _showFeedback('success','<i class="fa fa-check"></i> Added to cart! <a href="/cart">View cart</a> or <a href="/collections/all">continue shopping</a>.',$addToCartForm);
+            window.setTimeout(function(){
+              $addToCartBtn.prop('disabled', false).removeClass('disabled').removeClass('inverted');
+              _setText($addToCartBtn,_config.addToCartBtnLabel);
+              
+            }, _config.howLongTillBtnReturnsToNormal);
+            // Update cart count and show cart link.
+            $.getJSON(_config.shopifyAjaxCartURL, function(cart) {
+              if (_config.cartCountSelector && $(_config.cartCountSelector).length) {
+                var value = $(_config.cartCountSelector).html() || '0';
+                $(_config.cartCountSelector).html(value.replace(/[0-9]+/,cart.item_count)).removeClass('hidden-count');
+              }
+              if (_config.cartTotalSelector && $(_config.cartTotalSelector).length) {
+                if (typeof Currency !== 'undefined' && typeof Currency.moneyFormats !== 'undefined') {
+                  var newCurrency = '';
+                  if ($('[name="currencies"]').length) {
+                    newCurrency = $('[name="currencies"]').val();
+                  }
+                  else if ($('#currencies span.selected').length) {
+                    newCurrency = $('#currencies span.selected').attr('data-currency');
+                  }
+                  if (newCurrency) {
+                    $(_config.cartTotalSelector).html('<span class=money>' + Shopify.formatMoney(Currency.convert(cart.total_price, "{{ shop.currency }}", newCurrency), Currency.money_format[newCurrency]) + '</span>');
+                  } 
+                  else {
+                    $(_config.cartTotalSelector).html(Shopify.formatMoney(cart.total_price, "{{ shop.money_format | remove: "'" | remove: '"' }}"));
+                  }
+                }
+                else {
+                  $(_config.cartTotalSelector).html(Shopify.formatMoney(cart.total_price, "{{ shop.money_format | remove: "'" | remove: '"' }}"));
+                }
+              };
+            });        
+          }, 
+          error: function(XMLHttpRequest) {
+            var response = eval('(' + XMLHttpRequest.responseText + ')');
+            response = response.description;
+            if (response.slice(0,4) === 'All ') {
+              _showFeedback('error', response.replace('All 1 ', 'All '), $addToCartForm);
+              $addToCartBtn.prop('disabled', false);
+              _setText($addToCartBtn, _config.soldOutBtnLabel);
+              $addToCartBtn.prop('disabled',true);
+            }
+            else {
+              _showFeedback('error', '<i class="fa fa-warning"></i> ' + response, $addToCartForm);
+              $addToCartBtn.prop('disabled', false).removeClass('disabled');
+              _setText($addToCartBtn, _config.addToCartBtnLabel);
+            }
+          }
+        });   
+        return false;    
+      });
+    });
+  };
+  return {
+    init: function(params) {
+        // Configuration
+        params = params || {};
+        // Merging with defaults.
+        $.extend(_config, params);
+        // Action
+        $(function() {
+          _init();
+        });
+    },    
+    getConfig: function() {
+      return _config;
+    }
+  }  
+})(jQuery);
+</script>
+
+
+
+<script>
+function cartBuild() {  
+  $('.ajaxcart').on('click', function(){  
+    setTimeout(function(){
+    	document.dispatchEvent(new CustomEvent('cart:build'));
+    }, 1000);
+    });  
+};
+$(function(){
+  $('button.add-to-cart').on('click', function(){  
+    setTimeout(function(){
+    	document.dispatchEvent(new CustomEvent('cart:build'));
+        $('.js-drawer-open-cart').trigger('click');
+    }, 1000);
+  });  
+}); 
+  
+
+function upInit() {
+      setTimeout(function(){
+        $(".prismfly-plugin").load(location.href+" .prismfly-plugin>*","" , function( response, status ){
+               success: $('body .prismfly-plugin:first').not('.cloned').clone(true).addClass('cloned').appendTo($('body .prismfly-upsell-container')).show(), Shopify.AjaxifyCart.init(), cartBuild();
+        });
+      }, 1000);
+};
+</script>
